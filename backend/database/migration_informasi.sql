@@ -1,6 +1,4 @@
--- SQL Migration for Table: informasi
-
-USE ipl_rt_db;
+-- SQL Migration for Table: informasi (PostgreSQL)
 
 CREATE TABLE IF NOT EXISTS informasi (
     id VARCHAR(36) PRIMARY KEY,
@@ -11,7 +9,7 @@ CREATE TABLE IF NOT EXISTS informasi (
     foto_url VARCHAR(255),
     video_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Delete existing records to avoid duplicate primary keys on re-run
@@ -69,4 +67,5 @@ INSERT INTO informasi (id, judul, narasi, tanggal, kategori, foto_url, video_url
     'Olahraga',
     'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
     'https://www.w3schools.com/html/mov_bbb.mp4'
-);
+)
+ON CONFLICT (id) DO NOTHING;

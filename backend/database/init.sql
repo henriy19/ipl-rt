@@ -1,14 +1,11 @@
--- DDL Script for IPL RT Database
-
-CREATE DATABASE IF NOT EXISTS ipl_rt_db;
-USE ipl_rt_db;
+-- DDL Script for IPL RT Database (PostgreSQL)
 
 -- 1. Table: roles
 CREATE TABLE IF NOT EXISTS roles (
     id VARCHAR(36) PRIMARY KEY,
     nama_role VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. Table: menus
@@ -36,7 +33,7 @@ CREATE TABLE IF NOT EXISTS master_rw (
     ketua_rw VARCHAR(150),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 5. Table: master_rt
@@ -47,7 +44,7 @@ CREATE TABLE IF NOT EXISTS master_rt (
     ketua_rt VARCHAR(150),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (rw_id) REFERENCES master_rw(id)
 );
 
@@ -60,11 +57,11 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     blok_rumah VARCHAR(10),
     nomor_rumah VARCHAR(10),
-    status_hunian ENUM('pemilik', 'penyewa'),
+    status_hunian VARCHAR(20) CHECK (status_hunian IN ('pemilik', 'penyewa')),
     rt_id VARCHAR(36),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (rt_id) REFERENCES master_rt(id)
 );
@@ -76,7 +73,7 @@ CREATE TABLE IF NOT EXISTS master_iuran (
     nominal DECIMAL(15, 2) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 8. Table: tagihan
@@ -87,9 +84,9 @@ CREATE TABLE IF NOT EXISTS tagihan (
     bulan INT NOT NULL,
     tahun INT NOT NULL,
     nominal_tagihan DECIMAL(15, 2) NOT NULL,
-    status ENUM('unpaid', 'pending', 'paid') DEFAULT 'unpaid',
+    status VARCHAR(20) DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'pending', 'paid')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (master_iuran_id) REFERENCES master_iuran(id)
 );
@@ -98,17 +95,30 @@ CREATE TABLE IF NOT EXISTS tagihan (
 CREATE TABLE IF NOT EXISTS transaksi_pembayaran (
     id VARCHAR(36) PRIMARY KEY,
     tagihan_id VARCHAR(36) NOT NULL,
-    tanggal_bayar DATETIME,
+    tanggal_bayar TIMESTAMP,
     bukti_pembayaran_url VARCHAR(255),
     dicatat_oleh VARCHAR(36),
     diverifikasi_oleh VARCHAR(36),
-    tanggal_verifikasi DATETIME,
+    tanggal_verifikasi TIMESTAMP,
     catatan_bendahara TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tagihan_id) REFERENCES tagihan(id),
     FOREIGN KEY (dicatat_oleh) REFERENCES users(id),
     FOREIGN KEY (diverifikasi_oleh) REFERENCES users(id)
+);
+
+-- 10. Table: informasi (Fitur Informasi & Kegiatan)
+CREATE TABLE IF NOT EXISTS informasi (
+    id VARCHAR(36) PRIMARY KEY,
+    judul VARCHAR(255) NOT NULL,
+    narasi TEXT NOT NULL,
+    tanggal DATE NOT NULL,
+    kategori VARCHAR(50) DEFAULT 'Kegiatan',
+    foto_url VARCHAR(255),
+    video_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -121,16 +131,19 @@ INSERT INTO roles (id, nama_role) VALUES
 ('11111111-1111-1111-1111-111111111111', 'Admin'),
 ('22222222-2222-2222-2222-222222222222', 'Warga'),
 ('33333333-3333-3333-3333-333333333333', 'Petugas'),
-('44444444-4444-4444-4444-444444444444', 'Bendahara');
+('44444444-4444-4444-4444-444444444444', 'Bendahara')
+ON CONFLICT (id) DO NOTHING;
 
 -- Insert Master RW
 INSERT INTO master_rw (id, nomor_rw, ketua_rw) VALUES
-('rw010000-0000-0000-0000-000000000000', '010', 'Bapak RW 10');
+('rw010000-0000-0000-0000-000000000000', '010', 'Bapak RW 10')
+ON CONFLICT (id) DO NOTHING;
 
 -- Insert Master RT
 INSERT INTO master_rt (id, rw_id, nomor_rt, ketua_rt) VALUES
 ('rt001000-0000-0000-0000-000000000000', 'rw010000-0000-0000-0000-000000000000', '001', 'Bapak RT 01'),
-('rt002000-0000-0000-0000-000000000000', 'rw010000-0000-0000-0000-000000000000', '002', 'Bapak RT 02');
+('rt002000-0000-0000-0000-000000000000', 'rw010000-0000-0000-0000-000000000000', '002', 'Bapak RT 02')
+ON CONFLICT (id) DO NOTHING;
 
 -- Insert Users
 -- Note: The password for all these dummy users is 'password123'
@@ -138,37 +151,16 @@ INSERT INTO master_rt (id, rw_id, nomor_rt, ketua_rt) VALUES
 INSERT INTO users (id, role_id, nama_lengkap, no_hp, password_hash, blok_rumah, nomor_rumah, status_hunian, rt_id) VALUES 
 ('aaaa1111-1111-1111-1111-111111111111', '11111111-1111-1111-1111-111111111111', 'Budi Admin', '081100000001', '$2b$10$OrYeZmAOhkpwrGckKitZde5gvME8pgWPEg92mYqiAyYM7a9S04dL6', 'A', '1', 'pemilik', 'rt001000-0000-0000-0000-000000000000'),
 ('bbbb2222-2222-2222-2222-222222222222', '22222222-2222-2222-2222-222222222222', 'Agus Warga', '081100000002', '$2b$10$OrYeZmAOhkpwrGckKitZde5gvME8pgWPEg92mYqiAyYM7a9S04dL6', 'B', '12', 'pemilik', 'rt001000-0000-0000-0000-000000000000'),
-('cccc3333-3333-3333-3333-333333333333', '22222222-2222-2222-2222-222222222222', 'Siti Warga', '081100000003', '$2b$10$OrYeZmAOhkpwrGckKitZde5gvME8pgWPEg92mYqiAyYM7a9S04dL6', 'B', '14', 'penyewa', 'rt002000-0000-0000-0000-000000000000');
+('cccc3333-3333-3333-3333-333333333333', '22222222-2222-2222-2222-222222222222', 'Siti Warga', '081100000003', '$2b$10$OrYeZmAOhkpwrGckKitZde5gvME8pgWPEg92mYqiAyYM7a9S04dL6', 'B', '14', 'penyewa', 'rt002000-0000-0000-0000-000000000000')
+ON CONFLICT (id) DO NOTHING;
 
 -- Insert Master Iuran
 INSERT INTO master_iuran (id, nama_iuran, nominal) VALUES 
-('dddd4444-4444-4444-4444-444444444444', 'IPL Standar Warga', 150000.00);
+('dddd4444-4444-4444-4444-444444444444', 'IPL Standar Warga', 150000.00)
+ON CONFLICT (id) DO NOTHING;
 
-
--- ==========================================
--- 10. Table: informasi (Fitur Informasi & Kegiatan)
--- ==========================================
-CREATE TABLE IF NOT EXISTS informasi (
-    id VARCHAR(36) PRIMARY KEY,
-    judul VARCHAR(255) NOT NULL,
-    narasi TEXT NOT NULL,
-    tanggal DATE NOT NULL,
-    kategori VARCHAR(50) DEFAULT 'Kegiatan',
-    foto_url VARCHAR(255),
-    video_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
 
 -- Seed initial data for informasi
-DELETE FROM informasi WHERE id IN (
-    'info1111-1111-1111-1111-111111111111',
-    'info2222-2222-2222-2222-222222222222',
-    'info3333-3333-3333-3333-333333333333',
-    'info4444-4444-4444-4444-444444444444',
-    'info5555-5555-5555-5555-555555555555'
-);
-
 INSERT INTO informasi (id, judul, narasi, tanggal, kategori, foto_url, video_url) VALUES
 (
     'info1111-1111-1111-1111-111111111111',
@@ -214,5 +206,5 @@ INSERT INTO informasi (id, judul, narasi, tanggal, kategori, foto_url, video_url
     'Olahraga',
     'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=800',
     'https://www.w3schools.com/html/mov_bbb.mp4'
-);
-
+)
+ON CONFLICT (id) DO NOTHING;

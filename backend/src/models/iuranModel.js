@@ -4,14 +4,14 @@ const Iuran = {
     // Get all iuran
     async getAll() {
         const query = 'SELECT * FROM master_iuran ORDER BY created_at DESC';
-        const [rows] = await pool.query(query);
+        const { rows } = await pool.query(query);
         return rows;
     },
 
     // Find iuran by ID
     async getById(id) {
-        const query = 'SELECT * FROM master_iuran WHERE id = ?';
-        const [rows] = await pool.query(query, [id]);
+        const query = 'SELECT * FROM master_iuran WHERE id = $1';
+        const { rows } = await pool.query(query, [id]);
         return rows[0] || null;
     },
 
@@ -23,7 +23,7 @@ const Iuran = {
                 nama_iuran, 
                 nominal, 
                 is_active
-            ) VALUES (?, ?, ?, ?)
+            ) VALUES ($1, $2, $3, $4)
         `;
         const params = [
             iuranData.id,
@@ -31,18 +31,18 @@ const Iuran = {
             iuranData.nominal,
             iuranData.is_active !== undefined ? iuranData.is_active : true
         ];
-        const [result] = await pool.query(query, params);
-        return result;
+        const { rowCount } = await pool.query(query, params);
+        return { affectedRows: rowCount };
     },
 
     // Update iuran
     async update(id, iuranData) {
         const query = `
             UPDATE master_iuran SET 
-                nama_iuran = ?, 
-                nominal = ?, 
-                is_active = ?
-            WHERE id = ?
+                nama_iuran = $1, 
+                nominal = $2, 
+                is_active = $3
+            WHERE id = $4
         `;
         const params = [
             iuranData.nama_iuran,
@@ -50,15 +50,15 @@ const Iuran = {
             iuranData.is_active !== undefined ? iuranData.is_active : true,
             id
         ];
-        const [result] = await pool.query(query, params);
-        return result;
+        const { rowCount } = await pool.query(query, params);
+        return { affectedRows: rowCount };
     },
 
     // Delete iuran
     async delete(id) {
-        const query = 'DELETE FROM master_iuran WHERE id = ?';
-        const [result] = await pool.query(query, [id]);
-        return result;
+        const query = 'DELETE FROM master_iuran WHERE id = $1';
+        const { rowCount } = await pool.query(query, [id]);
+        return { affectedRows: rowCount };
     }
 };
 

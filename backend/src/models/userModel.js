@@ -26,7 +26,7 @@ const User = {
             LEFT JOIN master_rw rw ON rt.rw_id = rw.id
             ORDER BY u.created_at DESC
         `;
-        const [rows] = await pool.query(query);
+        const { rows } = await pool.query(query);
         return rows;
     },
 
@@ -53,16 +53,16 @@ const User = {
             JOIN roles r ON u.role_id = r.id
             LEFT JOIN master_rt rt ON u.rt_id = rt.id
             LEFT JOIN master_rw rw ON rt.rw_id = rw.id
-            WHERE u.id = ?
+            WHERE u.id = $1
         `;
-        const [rows] = await pool.query(query, [id]);
+        const { rows } = await pool.query(query, [id]);
         return rows[0] || null;
     },
 
     // Find a user by phone number
     async getByPhone(no_hp) {
-        const query = 'SELECT * FROM users WHERE no_hp = ?';
-        const [rows] = await pool.query(query, [no_hp]);
+        const query = 'SELECT * FROM users WHERE no_hp = $1';
+        const { rows } = await pool.query(query, [no_hp]);
         return rows[0] || null;
     },
 
@@ -80,7 +80,7 @@ const User = {
                 status_hunian, 
                 rt_id, 
                 is_active
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
         `;
         const params = [
             userData.id,
@@ -94,23 +94,23 @@ const User = {
             userData.rt_id || null,
             userData.is_active !== undefined ? userData.is_active : true
         ];
-        const [result] = await pool.query(query, params);
-        return result;
+        const { rowCount } = await pool.query(query, params);
+        return { affectedRows: rowCount };
     },
 
     // Update a user
     async update(id, userData) {
         const query = `
             UPDATE users SET 
-                role_id = ?, 
-                nama_lengkap = ?, 
-                no_hp = ?, 
-                blok_rumah = ?, 
-                nomor_rumah = ?, 
-                status_hunian = ?, 
-                rt_id = ?, 
-                is_active = ?
-            WHERE id = ?
+                role_id = $1, 
+                nama_lengkap = $2, 
+                no_hp = $3, 
+                blok_rumah = $4, 
+                nomor_rumah = $5, 
+                status_hunian = $6, 
+                rt_id = $7, 
+                is_active = $8
+            WHERE id = $9
         `;
         const params = [
             userData.role_id,
@@ -123,15 +123,15 @@ const User = {
             userData.is_active !== undefined ? userData.is_active : true,
             id
         ];
-        const [result] = await pool.query(query, params);
-        return result;
+        const { rowCount } = await pool.query(query, params);
+        return { affectedRows: rowCount };
     },
 
     // Delete a user
     async delete(id) {
-        const query = 'DELETE FROM users WHERE id = ?';
-        const [result] = await pool.query(query, [id]);
-        return result;
+        const query = 'DELETE FROM users WHERE id = $1';
+        const { rowCount } = await pool.query(query, [id]);
+        return { affectedRows: rowCount };
     }
 };
 

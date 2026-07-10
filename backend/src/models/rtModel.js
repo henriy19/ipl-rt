@@ -17,7 +17,7 @@ const RT = {
             WHERE rt.is_active = TRUE
             ORDER BY rw.nomor_rw ASC, rt.nomor_rt ASC
         `;
-        const [rows] = await pool.query(query);
+        const { rows } = await pool.query(query);
         return rows;
     }
 };
