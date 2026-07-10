@@ -1,0 +1,7 @@
+node_modules/
+.env
+uploads/
+test_image.png
+test_video.mp4
+dist/
+.DS_Store
