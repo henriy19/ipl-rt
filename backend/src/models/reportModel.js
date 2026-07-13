@@ -31,7 +31,7 @@ const Report = {
         return rekapBulanan;
     },
 
-    // Get list of unpaid warga (tunggakan) with filters
+    // Get list of warga bills (all statuses) with filters
     async getTunggakanWarga(bulan, tahun) {
         let query = `
             SELECT 
@@ -39,19 +39,22 @@ const Report = {
                 t.bulan,
                 t.tahun,
                 t.nominal_tagihan,
+                t.status,
                 u.nama_lengkap,
                 u.blok_rumah,
                 u.nomor_rumah,
                 u.no_hp,
                 rt.nomor_rt,
                 rw.nomor_rw,
-                mi.nama_iuran
+                mi.nama_iuran,
+                tp.metode_pembayaran
             FROM tagihan t
             JOIN users u ON t.user_id = u.id
             JOIN master_iuran mi ON t.master_iuran_id = mi.id
             LEFT JOIN master_rt rt ON u.rt_id = rt.id
             LEFT JOIN master_rw rw ON rt.rw_id = rw.id
-            WHERE t.status = 'unpaid'
+            LEFT JOIN transaksi_pembayaran tp ON t.id = tp.tagihan_id
+            WHERE 1=1
         `;
 
         const params = [];

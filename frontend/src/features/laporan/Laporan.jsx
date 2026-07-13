@@ -86,21 +86,31 @@ const Laporan = () => {
             </tr>
         `).join('');
 
-        // Buat baris tabel tunggakan
+        // Buat baris tabel warga
         const tunggakanRows = rekapData.daftar_tunggakan.length > 0 
-            ? rekapData.daftar_tunggakan.map((t, index) => `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${t.nama_lengkap}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">Blok ${t.blok_rumah || '-'}/${t.nomor_rumah || '-'} (RT ${t.nomor_rt || '-'})</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${t.nama_iuran}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${getNamaBulan(t.bulan)} ${t.tahun}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #d92727; font-weight: bold;">
-                        ${formatRupiah(t.nominal_tagihan)}
-                    </td>
-                </tr>
-            `).join('')
-            : `<tr><td colspan="6" style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #777;">Tidak ada tunggakan warga pada periode ini.</td></tr>`;
+            ? rekapData.daftar_tunggakan.map((t, index) => {
+                const statusText = t.status === 'paid' ? 'Lunas' : t.status === 'pending' ? 'Butuh Verifikasi' : 'Tunggakan';
+                const statusColor = t.status === 'paid' ? '#047857' : t.status === 'pending' ? '#b45309' : '#b91c1c';
+                const statusBg = t.status === 'paid' ? '#ecfdf5' : t.status === 'pending' ? '#fffbeb' : '#fef2f2';
+                return `
+                    <tr>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${t.nama_lengkap}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">Blok ${t.blok_rumah || '-'}/${t.nomor_rumah || '-'} (RT ${t.nomor_rt || '-'})</td>
+                        <td style="padding: 8px; border: 1px solid #ddd;">${t.nama_iuran}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${getNamaBulan(t.bulan)} ${t.tahun}</td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; color: ${statusColor}; background-color: ${statusBg}; border: 1px solid ${statusColor}40;">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: ${statusColor};">
+                            ${formatRupiah(t.nominal_tagihan)}
+                        </td>
+                    </tr>
+                `;
+            }).join('')
+            : `<tr><td colspan="7" style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #777;">Tidak ada data tagihan warga pada periode ini.</td></tr>`;
 
         printWindow.document.write(`
             <html>
@@ -163,16 +173,17 @@ const Laporan = () => {
                         </tbody>
                     </table>
 
-                    <div class="table-title">Daftar Tunggakan Pembayaran Warga (${rekapData.bulan_filter === 'Semua' ? 'Seluruh Bulan' : getNamaBulan(rekapData.bulan_filter)})</div>
+                    <div class="table-title">Daftar Status Pembayaran & Tagihan Warga (${rekapData.bulan_filter === 'Semua' ? 'Seluruh Bulan' : getNamaBulan(rekapData.bulan_filter)})</div>
                     <table>
                         <thead>
                             <tr>
                                 <th style="width: 5%; text-align: center;">No</th>
                                 <th style="width: 25%;">Nama Lengkap</th>
-                                <th style="width: 25%;">Alamat Rumah</th>
+                                <th style="width: 20%;">Alamat Rumah</th>
                                 <th style="width: 15%;">Jenis Iuran</th>
-                                <th style="width: 15%; text-align: center;">Periode</th>
-                                <th style="width: 15%; text-align: right;">Nominal</th>
+                                <th style="width: 12%; text-align: center;">Periode</th>
+                                <th style="width: 13%; text-align: center;">Status</th>
+                                <th style="width: 10%; text-align: right;">Nominal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -353,14 +364,14 @@ const Laporan = () => {
                         <div className="bg-white rounded-2xl border border-emerald-50 shadow-sm overflow-hidden flex flex-col lg:col-span-2">
                             <div className="px-5 py-4 border-b border-emerald-50 bg-emerald-50/20">
                                 <h3 className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
-                                    <FileText size={16} className="text-rose-500" />
-                                    <span>Daftar Warga Menunggak ({filterBulan === '' ? 'Seluruh Bulan' : getNamaBulan(parseInt(filterBulan, 10))})</span>
+                                    <FileText size={16} className="text-emerald-600" />
+                                    <span>Status Pembayaran & Tagihan Warga ({filterBulan === '' ? 'Seluruh Bulan' : getNamaBulan(parseInt(filterBulan, 10))})</span>
                                 </h3>
                             </div>
                             <div className="overflow-x-auto flex-1">
                                 {rekapData.daftar_tunggakan.length === 0 ? (
                                     <div className="py-24 text-center text-emerald-600/60 font-semibold text-sm">
-                                        Yey! Tidak ada tunggakan pembayaran warga pada periode ini.
+                                        Tidak ada data tagihan warga pada periode ini.
                                     </div>
                                 ) : (
                                     <table className="min-w-full divide-y divide-emerald-50">
@@ -370,19 +381,37 @@ const Laporan = () => {
                                                 <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Alamat</th>
                                                 <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Iuran</th>
                                                 <th className="px-5 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Periode</th>
+                                                <th className="px-5 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Status</th>
                                                 <th className="px-5 py-3 text-right text-xs font-semibold text-emerald-800 uppercase">Nominal</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-emerald-50/50">
                                             {rekapData.daftar_tunggakan.map(t => (
-                                                <tr key={t.tagihan_id} className="hover:bg-rose-50/5 transition-colors">
+                                                <tr key={t.tagihan_id} className="hover:bg-emerald-50/5 transition-colors">
                                                     <td className="px-5 py-3 text-sm font-semibold text-emerald-950">{t.nama_lengkap}</td>
                                                     <td className="px-5 py-3 text-xs text-emerald-600 font-medium">
                                                         Blok {t.blok_rumah || '-'}/{t.nomor_rumah || '-'} (RT {t.nomor_rt || '-'})
                                                     </td>
                                                     <td className="px-5 py-3 text-sm text-emerald-900 font-semibold">{t.nama_iuran}</td>
                                                     <td className="px-5 py-3 text-xs text-emerald-600 font-semibold text-center">{getNamaBulan(t.bulan)} {t.tahun}</td>
-                                                    <td className="px-5 py-3 text-sm text-rose-600 font-bold text-right">{formatRupiah(t.nominal_tagihan)}</td>
+                                                    <td className="px-5 py-3 text-center whitespace-nowrap">
+                                                        {t.status === 'paid' ? (
+                                                            <span className="inline-flex items-center text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                                                                Lunas
+                                                            </span>
+                                                        ) : t.status === 'pending' ? (
+                                                            <span className="inline-flex items-center text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                                                                Pending Verif
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center text-[10px] font-bold text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+                                                                Tunggakan
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className={`px-5 py-3 text-sm font-bold text-right ${
+                                                        t.status === 'paid' ? 'text-emerald-700' : t.status === 'pending' ? 'text-amber-600' : 'text-rose-600'
+                                                    }`}>{formatRupiah(t.nominal_tagihan)}</td>
                                                 </tr>
                                             ))}
                                         </tbody>

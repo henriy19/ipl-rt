@@ -20,12 +20,13 @@ const GetRekapitulasi = async (req, res, next) => {
         // Hitung total pemasukan dalam setahun
         const totalPemasukanTahunan = pemasukanBulanan.reduce((sum, item) => sum + item.total, 0);
 
-        // 2. Dapatkan daftar warga yang masih menunggak
-        // Jika filter bulan tidak dikirimkan, secara default ambil semua tunggakan
-        const tunggakanWarga = await Report.getTunggakanWarga(bulan, tahun);
+        // 2. Dapatkan daftar seluruh tagihan warga
+        const tagihanWarga = await Report.getTunggakanWarga(bulan, tahun);
 
-        // Hitung total nilai tunggakan yang belum dibayar
-        const totalTunggakan = tunggakanWarga.reduce((sum, item) => sum + parseFloat(item.nominal_tagihan), 0);
+        // Hitung total nilai tunggakan yang belum lunas (status != paid)
+        const totalTunggakan = tagihanWarga
+            .filter(item => item.status !== 'paid')
+            .reduce((sum, item) => sum + parseFloat(item.nominal_tagihan), 0);
 
         return res.success('Berhasil mengambil data rekapitulasi laporan', {
             tahun,
@@ -33,7 +34,7 @@ const GetRekapitulasi = async (req, res, next) => {
             total_pemasukan_tahunan: totalPemasukanTahunan,
             total_tunggakan: totalTunggakan,
             rekap_pemasukan_bulanan: pemasukanBulanan,
-            daftar_tunggakan: tunggakanWarga
+            daftar_tunggakan: tagihanWarga
         });
     } catch (error) {
         next(error);
