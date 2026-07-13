@@ -30,6 +30,13 @@ Seluruh komponen pada Fase 4 (Autentikasi, CRUD Backend untuk Warga/Iuran/RT/Rol
 ### 4. Modul CRUD Master Iuran (Selesai)
 - **`backend/src/models/iuranModel.js`** & **`iuranController.js`** & **`iuranRoutes.js`**:
   - Fungsionalitas CRUD lengkap dan aman untuk iuran bulanan (`master_iuran`).
+- **`frontend/src/features/iuran/Iuran.jsx` [NEW]**:
+  - Implementasi halaman utama Master Iuran yang menyajikan data iuran bulanan dalam bentuk tabel premium.
+  - **Aksi Tambah Iuran**: Modal form input untuk mendaftarkan jenis iuran baru (Nama & Nominal).
+  - **Aksi Edit Iuran**: Modal form untuk memperbarui data iuran terpilih.
+  - **Aksi Hapus Iuran**: Modal konfirmasi sebelum menghapus iuran agar tidak mengganggu transaksi warga.
+  - **Ringkasan Statistik**: Menampilkan metrik Total Jenis Iuran, Iuran Aktif, dan Iuran Nonaktif secara dinamis di atas tabel.
+  - **Keamanan RBAC**: Membatasi tombol aksi tulis (Tambah/Edit/Hapus) agar hanya muncul untuk peran Admin, Bendahara, dan Petugas. Pengguna dengan peran Warga biasa hanya memiliki akses baca (read-only) tanpa tombol aksi.
 
 ### 5. Integrasi UI & Fitur Interaktif CRUD Warga (Baru)
 - **`frontend/src/features/warga/Warga.jsx`**:

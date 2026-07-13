@@ -34,9 +34,10 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
   - Endpoint `GET /api/roles` untuk mengambil daftar Peran (Roles) untuk pilihan dropdown form.
 
 ### 4. Modul Master Iuran CRUD (Selesai)
-- **`src/models/iuranModel.js`**: Query aman ke tabel `master_iuran`.
-- **`src/controllers/iuranController.js`**: Fungsi CRUD standar untuk iuran.
-- **`src/routes/iuranRoutes.js`**: Router iuran yang aman (membutuhkan JWT).
+- **`backend/src/models/iuranModel.js`**: Query aman ke tabel `master_iuran`.
+- **`backend/src/controllers/iuranController.js`**: Fungsi CRUD standar untuk iuran.
+- **`backend/src/routes/iuranRoutes.js`**: Router iuran yang aman (membutuhkan JWT).
+- **`frontend/src/features/iuran/Iuran.jsx` [NEW]**: Halaman Master Iuran interaktif dengan fitur Tambah, Edit, Hapus, Pencarian, Ringkasan Statistik, serta Pembatasan RBAC agar hanya dapat dimodifikasi oleh Admin/Bendahara/Petugas.
 
 ### 5. Integrasi UI & Fitur Interaktif CRUD Warga (Baru)
 - **`src/services/api.js`**: Axios instance sentral dengan baseURL dan interceptor token.
