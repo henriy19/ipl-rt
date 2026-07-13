@@ -184,6 +184,13 @@ const Transaksi = () => {
             
             if (res.data && res.data.status === 'success') {
                 setIsPayOpen(false);
+                setAlertModal({
+                    isOpen: true,
+                    type: 'success',
+                    message: payMode === 'verify' 
+                        ? 'Tagihan berhasil diverifikasi Lunas!' 
+                        : 'Pembayaran berhasil dicatat/dikirim. Status sekarang: Menunggu Verifikasi.'
+                });
                 fetchTransactions();
             } else {
                 setFormError(res.data.message || 'Gagal memproses transaksi');
@@ -465,7 +472,7 @@ const Transaksi = () => {
                                                             onClick={() => openPayModal(t, 'direct')}
                                                             className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-emerald-50"
                                                         >
-                                                            Tandai Lunas
+                                                            Catat Bayar
                                                         </button>
                                                     )}
                                                     {t.status === 'pending' && (
@@ -506,8 +513,8 @@ const Transaksi = () => {
                     <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden border border-emerald-50/50 shadow-2xl animate-scale-in">
                         <div className="px-6 py-4 bg-emerald-50/40 border-b border-emerald-50 flex items-center justify-between">
                             <h3 className="font-bold text-emerald-950 text-base">
-                                {payMode === 'direct' && 'Tandai Lunas Langsung'}
-                                {payMode === 'verify' && 'Verifikasi Pembayaran Warga'}
+                                {payMode === 'direct' && 'Catat Pembayaran Warga'}
+                                {payMode === 'verify' && 'Verifikasi Pembayaran Lunas'}
                                 {payMode === 'submit' && 'Konfirmasi Pembayaran Iuran'}
                             </h3>
                             <button onClick={() => setIsPayOpen(false)} className="text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 p-1 rounded-lg transition-all cursor-pointer">
@@ -583,8 +590,8 @@ const Transaksi = () => {
                                         <>
                                             <Save size={16} />
                                             <span>
-                                                {payMode === 'direct' && 'Tandai Lunas'}
-                                                {payMode === 'verify' && 'Setujui & Verifikasi'}
+                                                {payMode === 'direct' && 'Catat Pembayaran'}
+                                                {payMode === 'verify' && 'Setujui & Verifikasi Lunas'}
                                                 {payMode === 'submit' && 'Kirim Konfirmasi'}
                                             </span>
                                         </>
