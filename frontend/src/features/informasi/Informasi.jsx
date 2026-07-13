@@ -206,7 +206,8 @@ const Informasi = () => {
     const getMediaUrl = (url) => {
         if (!url) return '';
         if (url.startsWith('/uploads')) {
-            return `http://localhost:5000${url}`;
+            const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            return `${baseUrl}${url}`;
         }
         return url;
     };
