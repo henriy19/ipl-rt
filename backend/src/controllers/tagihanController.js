@@ -92,9 +92,70 @@ const BayarTagihan = async (req, res, next) => {
     }
 };
 
+const SubmitPembayaran = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { metode_pembayaran, catatan_bendahara } = req.body;
+
+        const tagihan = await Tagihan.getById(id);
+        if (!tagihan) {
+            return res.error('Tagihan tidak ditemukan', 404);
+        }
+
+        if (tagihan.status !== 'unpaid') {
+            return res.error('Tagihan sudah terbayar atau dalam proses verifikasi', 400);
+        }
+
+        const paymentData = {
+            dicatat_oleh: req.user.id,
+            metode_pembayaran: metode_pembayaran || 'cash',
+            catatan_bendahara: catatan_bendahara || 'Pembayaran disubmit oleh warga',
+            tanggal_bayar: new Date()
+        };
+
+        const result = await Tagihan.submitPembayaran(id, paymentData);
+
+        if (!result.success) {
+            return res.error(result.message || 'Gagal mengirim pembayaran', 400);
+        }
+
+        return res.success('Bukti pembayaran berhasil dikirim, menunggu verifikasi pengurus.');
+    } catch (error) {
+        next(error);
+    }
+};
+
+const VerifikasiPembayaran = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { catatan_bendahara } = req.body;
+
+        const tagihan = await Tagihan.getById(id);
+        if (!tagihan) {
+            return res.error('Tagihan tidak ditemukan', 404);
+        }
+
+        if (tagihan.status !== 'pending') {
+            return res.error('Tagihan tidak dalam status menunggu verifikasi', 400);
+        }
+
+        const result = await Tagihan.verifikasiPembayaran(id, req.user.id, catatan_bendahara);
+
+        if (!result.success) {
+            return res.error(result.message || 'Gagal melakukan verifikasi', 400);
+        }
+
+        return res.success('Tagihan berhasil diverifikasi Lunas');
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     GenerateTagihan,
     GetAllTagihan,
     GetWargaHistory,
-    BayarTagihan
+    BayarTagihan,
+    SubmitPembayaran,
+    VerifikasiPembayaran
 };

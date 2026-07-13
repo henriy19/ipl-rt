@@ -41,6 +41,7 @@ const Transaksi = () => {
         catatan_bendahara: ''
     });
 
+    const [payMode, setPayMode] = useState('direct'); // 'direct', 'verify', 'submit'
     const [genLoading, setGenLoading] = useState(false);
 
     // Custom Dialog States
@@ -152,30 +153,40 @@ const Transaksi = () => {
     };
 
     // Open Modal Pembayaran
-    const openPayModal = (tagihan) => {
+    const openPayModal = (tagihan, mode = 'direct') => {
         setSelectedTagihan(tagihan);
+        setPayMode(mode);
         setPayForm({
-            metode_pembayaran: 'cash',
-            catatan_bendahara: ''
+            metode_pembayaran: tagihan.metode_pembayaran || 'cash',
+            catatan_bendahara: mode === 'verify' ? 'Pembayaran terverifikasi lunas oleh pengurus' : ''
         });
         setFormError('');
         setIsPayOpen(true);
     };
 
-    // Submit Pembayaran / Tandai Lunas
+    // Submit Pembayaran / Tandai Lunas / Verifikasi
     const handlePaySubmit = async (e) => {
         e.preventDefault();
         try {
             setSubmitLoading(true);
             setFormError('');
             
-            const res = await api.post(`/tagihan/${selectedTagihan.id}/bayar`, payForm);
+            let res;
+            if (payMode === 'direct') {
+                res = await api.post(`/tagihan/${selectedTagihan.id}/bayar`, payForm);
+            } else if (payMode === 'verify') {
+                res = await api.post(`/tagihan/${selectedTagihan.id}/verifikasi`, {
+                    catatan_bendahara: payForm.catatan_bendahara
+                });
+            } else if (payMode === 'submit') {
+                res = await api.post(`/tagihan/${selectedTagihan.id}/submit`, payForm);
+            }
             
             if (res.data && res.data.status === 'success') {
                 setIsPayOpen(false);
                 fetchTransactions();
             } else {
-                setFormError(res.data.message || 'Gagal memproses pembayaran');
+                setFormError(res.data.message || 'Gagal memproses transaksi');
             }
         } catch (err) {
             console.error(err);
@@ -383,11 +394,9 @@ const Transaksi = () => {
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Periode</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Status</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Detail Pembayaran</th>
-                                    {isAuthorized && (
-                                        <th scope="col" className="relative px-6 py-4">
-                                            <span className="sr-only">Aksi</span>
-                                        </th>
-                                    )}
+                                    <th scope="col" className="relative px-6 py-4 text-right text-xs font-semibold text-emerald-800 uppercase tracking-wider">
+                                        <span>Aksi</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-emerald-50/50">
@@ -419,8 +428,13 @@ const Transaksi = () => {
                                                     <CheckCircle size={12} />
                                                     <span>Lunas</span>
                                                 </span>
+                                            ) : t.status === 'pending' ? (
+                                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-500 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100 animate-pulse">
+                                                    <AlertCircle size={12} />
+                                                    <span>Menunggu Verifikasi</span>
+                                                </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-500 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100 animate-pulse">
+                                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-500 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100">
                                                     <XCircle size={12} />
                                                     <span>Tunggakan</span>
                                                 </span>
@@ -433,22 +447,49 @@ const Transaksi = () => {
                                                     <p>Tgl Bayar: {new Date(t.tanggal_bayar).toLocaleDateString('id-ID')}</p>
                                                     {t.catatan_bendahara && <p className="italic">Note: "{t.catatan_bendahara}"</p>}
                                                 </div>
+                                            ) : t.status === 'pending' ? (
+                                                <div className="space-y-0.5">
+                                                    <p>Metode: <strong className="capitalize">{t.metode_pembayaran}</strong></p>
+                                                    <p>Tgl Kirim: {new Date(t.tanggal_bayar).toLocaleDateString('id-ID')}</p>
+                                                    {t.catatan_bendahara && <p className="italic">Pesan Warga: "{t.catatan_bendahara}"</p>}
+                                                </div>
                                             ) : (
                                                 <span className="text-gray-400 font-medium">Belum membayar</span>
                                             )}
                                         </td>
-                                        {isAuthorized && (
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                {t.status !== 'paid' && (
-                                                    <button 
-                                                        onClick={() => openPayModal(t)}
-                                                        className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-emerald-50"
-                                                    >
-                                                        Tandai Lunas
-                                                    </button>
-                                                )}
-                                            </td>
-                                        )}
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            {isAuthorized ? (
+                                                <>
+                                                    {t.status === 'unpaid' && (
+                                                        <button 
+                                                            onClick={() => openPayModal(t, 'direct')}
+                                                            className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-emerald-50"
+                                                        >
+                                                            Tandai Lunas
+                                                        </button>
+                                                    )}
+                                                    {t.status === 'pending' && (
+                                                        <button 
+                                                            onClick={() => openPayModal(t, 'verify')}
+                                                            className="px-3 py-1.5 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-teal-50"
+                                                        >
+                                                            Verifikasi Lunas
+                                                        </button>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {t.status === 'unpaid' && (
+                                                        <button 
+                                                            onClick={() => openPayModal(t, 'submit')}
+                                                            className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all cursor-pointer shadow-sm shadow-emerald-50"
+                                                        >
+                                                            Bayar Sekarang
+                                                        </button>
+                                                    )}
+                                                </>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -464,7 +505,11 @@ const Transaksi = () => {
                 <div className="fixed inset-0 bg-emerald-950/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-3xl w-full max-w-md overflow-hidden border border-emerald-50/50 shadow-2xl animate-scale-in">
                         <div className="px-6 py-4 bg-emerald-50/40 border-b border-emerald-50 flex items-center justify-between">
-                            <h3 className="font-bold text-emerald-950 text-base">Verifikasi Pembayaran IPL</h3>
+                            <h3 className="font-bold text-emerald-950 text-base">
+                                {payMode === 'direct' && 'Tandai Lunas Langsung'}
+                                {payMode === 'verify' && 'Verifikasi Pembayaran Warga'}
+                                {payMode === 'submit' && 'Konfirmasi Pembayaran Iuran'}
+                            </h3>
                             <button onClick={() => setIsPayOpen(false)} className="text-gray-400 hover:text-emerald-700 hover:bg-emerald-50 p-1 rounded-lg transition-all cursor-pointer">
                                 <X size={20} />
                             </button>
@@ -480,7 +525,9 @@ const Transaksi = () => {
 
                             {/* Info Tagihan */}
                             <div className="bg-emerald-50/30 p-4 rounded-2xl border border-emerald-100/50 text-sm space-y-1">
-                                <p className="text-emerald-800">Warga: <strong>{selectedTagihan?.nama_lengkap}</strong></p>
+                                {isAuthorized && selectedTagihan?.nama_lengkap && (
+                                    <p className="text-emerald-800">Warga: <strong>{selectedTagihan?.nama_lengkap}</strong></p>
+                                )}
                                 <p className="text-emerald-800">Iuran: <strong>{selectedTagihan?.nama_iuran}</strong></p>
                                 <p className="text-emerald-800">Nominal: <strong>{formatRupiah(selectedTagihan?.nominal_tagihan)}</strong></p>
                                 <p className="text-emerald-800">Periode: <strong>{getNamaBulan(selectedTagihan?.bulan)} {selectedTagihan?.tahun}</strong></p>
@@ -492,7 +539,8 @@ const Transaksi = () => {
                                     name="metode_pembayaran"
                                     value={payForm.metode_pembayaran}
                                     onChange={(e) => setPayForm(prev => ({ ...prev, metode_pembayaran: e.target.value }))}
-                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 text-emerald-900 transition-colors"
+                                    disabled={payMode === 'verify'}
+                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 text-emerald-900 transition-colors disabled:opacity-75 disabled:cursor-not-allowed"
                                 >
                                     <option value="cash">Tunai (Cash)</option>
                                     <option value="transfer">Transfer Bank / E-Wallet</option>
@@ -500,14 +548,16 @@ const Transaksi = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-emerald-950 mb-1.5">Catatan / Bukti Bayar</label>
+                                <label className="block text-sm font-semibold text-emerald-950 mb-1.5">
+                                    {payMode === 'submit' ? 'Catatan Pembayaran (Misal: Pengirim Mandiri An. Budi)' : 'Catatan Bendahara'}
+                                </label>
                                 <textarea
                                     name="catatan_bendahara"
                                     value={payForm.catatan_bendahara}
                                     onChange={(e) => setPayForm(prev => ({ ...prev, catatan_bendahara: e.target.value }))}
                                     rows="3"
                                     className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
-                                    placeholder="Contoh: Lunas via transfer Mandiri An. Budi"
+                                    placeholder={payMode === 'submit' ? 'Contoh: Sudah ditransfer via Mandiri atas nama Budi Warga' : 'Contoh: Lunas via transfer Mandiri An. Budi'}
                                 />
                             </div>
 
@@ -532,7 +582,11 @@ const Transaksi = () => {
                                     ) : (
                                         <>
                                             <Save size={16} />
-                                            <span>Tandai Lunas</span>
+                                            <span>
+                                                {payMode === 'direct' && 'Tandai Lunas'}
+                                                {payMode === 'verify' && 'Setujui & Verifikasi'}
+                                                {payMode === 'submit' && 'Kirim Konfirmasi'}
+                                            </span>
                                         </>
                                     )}
                                 </button>

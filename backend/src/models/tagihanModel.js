@@ -220,6 +220,97 @@ const Tagihan = {
         } finally {
             client.release();
         }
+    },
+
+    // Submit payment by Warga (status changes to 'pending' awaiting verification)
+    async submitPembayaran(tagihanId, paymentData) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            const tagihanRes = await client.query(`SELECT status FROM tagihan WHERE id = $1`, [tagihanId]);
+            if (tagihanRes.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return { success: false, message: 'Tagihan tidak ditemukan' };
+            }
+            if (tagihanRes.rows[0].status !== 'unpaid') {
+                await client.query('ROLLBACK');
+                return { success: false, message: 'Tagihan sudah dibayar atau dalam proses verifikasi' };
+            }
+
+            // Update status to pending
+            await client.query(`UPDATE tagihan SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = $1`, [tagihanId]);
+
+            // Insert into transaksi_pembayaran
+            const paymentId = crypto.randomUUID();
+            const query = `
+                INSERT INTO transaksi_pembayaran (
+                    id, tagihan_id, tanggal_bayar, bukti_pembayaran_url, 
+                    dicatat_oleh, diverifikasi_oleh, tanggal_verifikasi, 
+                    catatan_bendahara, metode_pembayaran
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            `;
+            const params = [
+                paymentId,
+                tagihanId,
+                paymentData.tanggal_bayar || new Date(),
+                paymentData.bukti_pembayaran_url || null,
+                paymentData.dicatat_oleh,
+                null, // Belum diverifikasi
+                null, // Belum diverifikasi
+                paymentData.catatan_bendahara || null,
+                paymentData.metode_pembayaran || 'cash'
+            ];
+            await client.query(query, params);
+
+            await client.query('COMMIT');
+            return { success: true };
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    },
+
+    // Verify a pending payment by Admin
+    async verifikasiPembayaran(tagihanId, verifikatorId, catatan) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            const tagihanRes = await client.query(`SELECT status FROM tagihan WHERE id = $1`, [tagihanId]);
+            if (tagihanRes.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return { success: false, message: 'Tagihan tidak ditemukan' };
+            }
+            if (tagihanRes.rows[0].status !== 'pending') {
+                await client.query('ROLLBACK');
+                return { success: false, message: 'Tagihan tidak dalam status menunggu verifikasi' };
+            }
+
+            // Update status to paid
+            await client.query(`UPDATE tagihan SET status = 'paid', updated_at = CURRENT_TIMESTAMP WHERE id = $1`, [tagihanId]);
+
+            // Update verifier details in transaksi_pembayaran
+            const query = `
+                UPDATE transaksi_pembayaran SET 
+                    diverifikasi_oleh = $1,
+                    tanggal_verifikasi = CURRENT_TIMESTAMP,
+                    catatan_bendahara = COALESCE($2, catatan_bendahara),
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE tagihan_id = $3
+            `;
+            await client.query(query, [verifikatorId, catatan, tagihanId]);
+
+            await client.query('COMMIT');
+            return { success: true };
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 };
 

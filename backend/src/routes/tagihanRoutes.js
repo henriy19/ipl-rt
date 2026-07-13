@@ -3,7 +3,9 @@ const {
     GenerateTagihan,
     GetAllTagihan,
     GetWargaHistory,
-    BayarTagihan
+    BayarTagihan,
+    SubmitPembayaran,
+    VerifikasiPembayaran
 } = require('../controllers/tagihanController');
 const { protect } = require('../middlewares/authMiddleware');
 
@@ -34,7 +36,13 @@ router.post('/generate', authorizeRoles('Admin', 'Petugas', 'Bendahara'), Genera
 // Rute untuk melihat seluruh data tagihan (Admin)
 router.get('/', authorizeRoles('Admin', 'Petugas', 'Bendahara'), GetAllTagihan);
 
-// Rute untuk membayar / menandai lunas tagihan
+// Rute untuk membayar / menandai lunas tagihan langsung oleh Admin
 router.post('/:id/bayar', authorizeRoles('Admin', 'Petugas', 'Bendahara'), BayarTagihan);
+
+// Rute untuk warga mengirim / submit bukti pembayaran
+router.post('/:id/submit', SubmitPembayaran);
+
+// Rute untuk admin memverifikasi pembayaran pending warga menjadi lunas
+router.post('/:id/verifikasi', authorizeRoles('Admin', 'Petugas', 'Bendahara'), VerifikasiPembayaran);
 
 module.exports = router;
