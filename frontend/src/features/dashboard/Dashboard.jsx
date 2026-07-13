@@ -74,8 +74,9 @@ const Dashboard = () => {
   const getMediaUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('/uploads')) {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      return `${baseUrl}${url}`;
+      const rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const cleanUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
+      return `${cleanUrl}${url}`;
     }
     return url;
   };
