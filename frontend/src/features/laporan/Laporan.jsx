@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import html2pdf from 'html2pdf.js';
 import { 
     Loader2, 
     AlertCircle, 
@@ -211,35 +212,19 @@ const Laporan = () => {
 
         document.body.appendChild(element);
 
-        // Dynamically load html2pdf.js from CDN
-        const loadScript = () => {
-            return new Promise((resolve) => {
-                if (window.html2pdf) {
-                    resolve();
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-                script.onload = () => resolve();
-                document.head.appendChild(script);
-            });
+        const opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        loadScript().then(() => {
-            const opt = {
-                margin:       [10, 10, 10, 10],
-                filename:     filename,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            window.html2pdf().from(element).set(opt).save().then(() => {
-                element.remove();
-            }).catch(err => {
-                console.error('Error generating PDF:', err);
-                element.remove();
-            });
+        html2pdf().from(element).set(opt).save().then(() => {
+            element.remove();
+        }).catch(err => {
+            console.error('Error generating PDF:', err);
+            element.remove();
         });
     };
 
