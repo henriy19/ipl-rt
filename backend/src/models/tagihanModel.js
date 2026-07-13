@@ -25,6 +25,7 @@ const Tagihan = {
                 tp.tanggal_bayar,
                 tp.metode_pembayaran,
                 tp.catatan_bendahara,
+                tp.catatan_verifikasi,
                 tp.bukti_pembayaran_url,
                 tp.tanggal_verifikasi,
                 v.nama_lengkap AS verifikator_nama,
@@ -83,6 +84,7 @@ const Tagihan = {
                 tp.tanggal_bayar,
                 tp.metode_pembayaran,
                 tp.catatan_bendahara,
+                tp.catatan_verifikasi,
                 tp.tanggal_verifikasi,
                 v.nama_lengkap AS verifikator_nama,
                 c.nama_lengkap AS pencatat_nama
@@ -301,7 +303,7 @@ const Tagihan = {
                 UPDATE transaksi_pembayaran SET 
                     diverifikasi_oleh = $1,
                     tanggal_verifikasi = CURRENT_TIMESTAMP,
-                    catatan_bendahara = COALESCE($2, catatan_bendahara),
+                    catatan_verifikasi = $2,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE tagihan_id = $3
             `;

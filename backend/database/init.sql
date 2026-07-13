@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS transaksi_pembayaran (
 
 -- Ensure column exists for existing databases
 ALTER TABLE transaksi_pembayaran ADD COLUMN IF NOT EXISTS metode_pembayaran VARCHAR(50) DEFAULT 'cash';
+ALTER TABLE transaksi_pembayaran ADD COLUMN IF NOT EXISTS catatan_verifikasi TEXT;
 
 -- 10. Table: informasi (Fitur Informasi & Kegiatan)
 CREATE TABLE IF NOT EXISTS informasi (
