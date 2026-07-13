@@ -59,12 +59,16 @@ CREATE TABLE IF NOT EXISTS users (
     nomor_rumah VARCHAR(10),
     status_hunian VARCHAR(20) CHECK (status_hunian IN ('pemilik', 'penyewa')),
     rt_id VARCHAR(36),
+    jumlah_penghuni INT DEFAULT 1,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id),
     FOREIGN KEY (rt_id) REFERENCES master_rt(id)
 );
+
+-- Ensure column exists for existing databases
+ALTER TABLE users ADD COLUMN IF NOT EXISTS jumlah_penghuni INT DEFAULT 1;
 
 -- 7. Table: master_iuran
 CREATE TABLE IF NOT EXISTS master_iuran (

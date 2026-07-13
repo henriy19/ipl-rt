@@ -11,6 +11,7 @@ const User = {
                 u.blok_rumah, 
                 u.nomor_rumah, 
                 u.status_hunian, 
+                u.jumlah_penghuni,
                 u.is_active, 
                 u.created_at, 
                 u.updated_at,
@@ -40,6 +41,7 @@ const User = {
                 u.blok_rumah, 
                 u.nomor_rumah, 
                 u.status_hunian, 
+                u.jumlah_penghuni,
                 u.is_active, 
                 u.created_at, 
                 u.updated_at,
@@ -79,8 +81,9 @@ const User = {
                 nomor_rumah, 
                 status_hunian, 
                 rt_id, 
+                jumlah_penghuni,
                 is_active
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         `;
         const params = [
             userData.id,
@@ -92,6 +95,7 @@ const User = {
             userData.nomor_rumah || null,
             userData.status_hunian || 'pemilik',
             userData.rt_id || null,
+            userData.jumlah_penghuni !== undefined ? parseInt(userData.jumlah_penghuni, 10) : 1,
             userData.is_active !== undefined ? userData.is_active : true
         ];
         const { rowCount } = await pool.query(query, params);
@@ -109,8 +113,9 @@ const User = {
                 nomor_rumah = $5, 
                 status_hunian = $6, 
                 rt_id = $7, 
-                is_active = $8
-            WHERE id = $9
+                jumlah_penghuni = $8,
+                is_active = $9
+            WHERE id = $10
         `;
         const params = [
             userData.role_id,
@@ -120,6 +125,7 @@ const User = {
             userData.nomor_rumah || null,
             userData.status_hunian,
             userData.rt_id || null,
+            userData.jumlah_penghuni !== undefined ? parseInt(userData.jumlah_penghuni, 10) : 1,
             userData.is_active !== undefined ? userData.is_active : true,
             id
         ];

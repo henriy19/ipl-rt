@@ -46,6 +46,7 @@ const Warga = () => {
         status_hunian: 'pemilik',
         rt_id: '',
         role_id: '',
+        jumlah_penghuni: 1,
         is_active: 1
     });
 
@@ -134,6 +135,7 @@ const Warga = () => {
             status_hunian: 'pemilik',
             rt_id: rtList[0]?.id || '',
             role_id: roleList.find(r => r.nama_role.toLowerCase() === 'warga')?.id || roleList[0]?.id || '',
+            jumlah_penghuni: 1,
             is_active: 1
         });
         setFormError('');
@@ -150,7 +152,8 @@ const Warga = () => {
             nomor_rumah: warga.nomor_rumah || '',
             status_hunian: warga.status_hunian || 'pemilik',
             rt_id: warga.rt_id || '',
-            role_id: warga.role_id || '',
+            role_id: warga.role_id,
+            jumlah_penghuni: warga.jumlah_penghuni || 1,
             is_active: warga.is_active
         });
         setFormError('');
@@ -257,41 +260,56 @@ const Warga = () => {
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4 animate-fade-in">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <Users size={24} />
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Populasi</p>
-                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">{wargaList.length} Orang</p>
-                    </div>
-                </div>
+            {(() => {
+                const totalJiwa = wargaList.reduce((acc, curr) => acc + (parseInt(curr.jumlah_penghuni, 10) || 1), 0);
+                return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4 animate-fade-in">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <Users size={24} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Kepala Keluarga</p>
+                                <p className="text-2xl font-bold text-emerald-950 mt-0.5">{wargaList.length} KK</p>
+                            </div>
+                        </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                        <Home size={24} />
-                    </div>
-                    <div>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Pemilik Hunian</p>
-                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                            {wargaList.filter(w => w.status_hunian === 'pemilik').length} KK
-                        </p>
-                    </div>
-                </div>
+                        <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <Users size={24} className="stroke-teal-600" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Populasi (Jiwa)</p>
+                                <p className="text-2xl font-bold text-emerald-950 mt-0.5">{totalJiwa} Jiwa</p>
+                            </div>
+                        </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
-                        <Users size={24} />
+                        <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <Home size={24} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Pemilik Hunian</p>
+                                <p className="text-2xl font-bold text-emerald-950 mt-0.5">
+                                    {wargaList.filter(w => w.status_hunian === 'pemilik').length} KK
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-5 rounded-2xl border border-emerald-50 shadow-sm flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                                <Users size={24} />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-teal-500 uppercase tracking-wider">Penyewa / Kontrak</p>
+                                <p className="text-2xl font-bold text-emerald-950 mt-0.5">
+                                    {wargaList.filter(w => w.status_hunian === 'penyewa').length} KK
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-xs font-semibold text-teal-500 uppercase tracking-wider">Penyewa / Kontrak</p>
-                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                            {wargaList.filter(w => w.status_hunian === 'penyewa').length} KK
-                        </p>
-                    </div>
-                </div>
-            </div>
+                );
+            })()}
 
             {/* Search & Actions Bar */}
             <div className="bg-white p-4 rounded-2xl border border-emerald-50 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -350,6 +368,7 @@ const Warga = () => {
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Alamat Rumah</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">RT / RW</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Hunian</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Penghuni</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Status</th>
                                     <th scope="col" className="relative px-6 py-4">
                                         <span className="sr-only">Actions</span>
@@ -391,6 +410,9 @@ const Warga = () => {
                                             }`}>
                                                 {warga.status_hunian}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-emerald-950 font-semibold">
+                                            {warga.jumlah_penghuni || 1} Jiwa
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {warga.is_active ? (
@@ -598,6 +620,20 @@ const Warga = () => {
                                 </div>
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-semibold text-emerald-950 mb-1.5">Jumlah Penghuni (Jiwa)</label>
+                                <input
+                                    type="number"
+                                    name="jumlah_penghuni"
+                                    min="1"
+                                    value={formData.jumlah_penghuni}
+                                    onChange={handleInputChange}
+                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
+                                    placeholder="Masukkan jumlah orang yang tinggal"
+                                    required
+                                />
+                            </div>
+
                             <div className="flex items-center gap-2 pt-2">
                                 <input
                                     type="checkbox"
@@ -791,6 +827,20 @@ const Warga = () => {
                                 </div>
                             </div>
 
+                            <div>
+                                <label className="block text-sm font-semibold text-emerald-950 mb-1.5">Jumlah Penghuni (Jiwa)</label>
+                                <input
+                                    type="number"
+                                    name="jumlah_penghuni"
+                                    min="1"
+                                    value={formData.jumlah_penghuni}
+                                    onChange={handleInputChange}
+                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
+                                    placeholder="Masukkan jumlah orang yang tinggal"
+                                    required
+                                />
+                            </div>
+
                             <div className="flex items-center gap-2 pt-2">
                                 <input
                                     type="checkbox"
@@ -875,6 +925,10 @@ const Warga = () => {
                                 <div>
                                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Status Hunian</p>
                                     <p className="font-semibold text-emerald-950 mt-0.5 capitalize">{selectedWarga.status_hunian}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Jumlah Penghuni</p>
+                                    <p className="font-semibold text-emerald-950 mt-0.5">{selectedWarga.jumlah_penghuni || 1} Jiwa</p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Alamat Lengkap</p>

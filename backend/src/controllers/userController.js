@@ -35,6 +35,7 @@ const CreateWarga = async (req, res, next) => {
             nomor_rumah, 
             status_hunian, 
             rt_id, 
+            jumlah_penghuni,
             is_active 
         } = req.body;
 
@@ -69,6 +70,7 @@ const CreateWarga = async (req, res, next) => {
             nomor_rumah,
             status_hunian,
             rt_id,
+            jumlah_penghuni: jumlah_penghuni !== undefined ? parseInt(jumlah_penghuni, 10) : 1,
             is_active
         };
 
@@ -94,6 +96,7 @@ const UpdateWarga = async (req, res, next) => {
             nomor_rumah, 
             status_hunian, 
             rt_id, 
+            jumlah_penghuni,
             is_active 
         } = req.body;
 
@@ -124,6 +127,7 @@ const UpdateWarga = async (req, res, next) => {
             nomor_rumah,
             status_hunian: status_hunian || existingWarga.status_hunian,
             rt_id,
+            jumlah_penghuni: jumlah_penghuni !== undefined ? parseInt(jumlah_penghuni, 10) : existingWarga.jumlah_penghuni,
             is_active: is_active !== undefined ? is_active : existingWarga.is_active
         };
 
