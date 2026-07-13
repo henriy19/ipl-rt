@@ -17,7 +17,7 @@ async function initializeDatabase() {
         await pool.query(sql);
         console.log('Database initialization completed successfully.');
     } catch (err) {
-        console.error('Error during database initialization:', err.message);
+        console.error('Error during database initialization:', err);
         throw err;
     }
 }

@@ -4,7 +4,9 @@ const { Pool } = require('pg');
 const pool = process.env.DATABASE_URL 
     ? new Pool({
         connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
+        ssl: process.env.DATABASE_URL.includes('railway.internal') 
+            ? false 
+            : { rejectUnauthorized: false }
     })
     : new Pool({
         host: process.env.DB_HOST || 'localhost',
@@ -22,7 +24,7 @@ pool.connect()
         client.release();
     })
     .catch(err => {
-        console.error('Error connecting to the database:', err.message);
+        console.error('Error connecting to the database:', err);
     });
 
 module.exports = pool;
