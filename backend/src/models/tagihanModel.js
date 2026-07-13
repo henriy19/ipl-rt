@@ -27,7 +27,8 @@ const Tagihan = {
                 tp.catatan_bendahara,
                 tp.bukti_pembayaran_url,
                 tp.tanggal_verifikasi,
-                v.nama_lengkap AS verifikator_nama
+                v.nama_lengkap AS verifikator_nama,
+                c.nama_lengkap AS pencatat_nama
             FROM tagihan t
             JOIN users u ON t.user_id = u.id
             JOIN master_iuran mi ON t.master_iuran_id = mi.id
@@ -35,6 +36,7 @@ const Tagihan = {
             LEFT JOIN master_rw rw ON rt.rw_id = rw.id
             LEFT JOIN transaksi_pembayaran tp ON t.id = tp.tagihan_id
             LEFT JOIN users v ON tp.diverifikasi_oleh = v.id
+            LEFT JOIN users c ON tp.dicatat_oleh = c.id
         `;
         
         const params = [];
@@ -82,11 +84,13 @@ const Tagihan = {
                 tp.metode_pembayaran,
                 tp.catatan_bendahara,
                 tp.tanggal_verifikasi,
-                v.nama_lengkap AS verifikator_nama
+                v.nama_lengkap AS verifikator_nama,
+                c.nama_lengkap AS pencatat_nama
             FROM tagihan t
             JOIN master_iuran mi ON t.master_iuran_id = mi.id
             LEFT JOIN transaksi_pembayaran tp ON t.id = tp.tagihan_id
             LEFT JOIN users v ON tp.diverifikasi_oleh = v.id
+            LEFT JOIN users c ON tp.dicatat_oleh = c.id
             WHERE t.user_id = $1
             ORDER BY t.tahun DESC, t.bulan DESC
         `;
