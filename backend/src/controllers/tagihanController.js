@@ -86,7 +86,7 @@ const BayarTagihan = async (req, res, next) => {
             return res.error(result.message || 'Gagal memproses pembayaran', 400);
         }
 
-        return res.success('Tagihan berhasil ditandai Lunas');
+        return res.success('Pembayaran berhasil dicatat, silakan verifikasi untuk melunasi.');
     } catch (error) {
         next(error);
     }

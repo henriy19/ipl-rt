@@ -187,8 +187,8 @@ const Tagihan = {
                 return { success: false, message: 'Tagihan sudah lunas' };
             }
 
-            // Update bill status
-            await client.query(`UPDATE tagihan SET status = 'paid', updated_at = CURRENT_TIMESTAMP WHERE id = $1`, [tagihanId]);
+            // Update bill status to pending (needs verification first)
+            await client.query(`UPDATE tagihan SET status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = $1`, [tagihanId]);
 
             // Insert payment transaction record
             const paymentId = crypto.randomUUID();
@@ -205,8 +205,8 @@ const Tagihan = {
                 paymentData.tanggal_bayar || new Date(),
                 paymentData.bukti_pembayaran_url || null,
                 paymentData.dicatat_oleh,
-                paymentData.diverifikasi_oleh,
-                paymentData.tanggal_verifikasi || new Date(),
+                null, // Needs verification
+                null, // Needs verification
                 paymentData.catatan_bendahara || null,
                 paymentData.metode_pembayaran || 'cash'
             ];
