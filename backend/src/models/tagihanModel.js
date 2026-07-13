@@ -129,6 +129,16 @@ const Tagihan = {
                 return { count: 0, message: 'Tidak ada warga aktif untuk di-generate' };
             }
 
+            // Check if bills already exist for the selected month/year
+            const checkExistRes = await client.query(`
+                SELECT COUNT(*) FROM tagihan WHERE bulan = $1 AND tahun = $2
+            `, [bulan, tahun]);
+            const existingCount = parseInt(checkExistRes.rows[0].count, 10);
+            if (existingCount > 0) {
+                await client.query('ROLLBACK');
+                return { count: 0, message: `Tagihan untuk periode ${bulan}/${tahun} sudah pernah di-generate sebelumnya.` };
+            }
+
             let generatedCount = 0;
 
             // 3. Insert bills if not already exists
