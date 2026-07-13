@@ -43,6 +43,18 @@ const Transaksi = () => {
 
     const [genLoading, setGenLoading] = useState(false);
 
+    // Custom Dialog States
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        message: '',
+        onConfirm: null
+    });
+    const [alertModal, setAlertModal] = useState({
+        isOpen: false,
+        type: 'success',
+        message: ''
+    });
+
     useEffect(() => {
         fetchTransactions();
     }, [filterBulan, filterTahun, filterStatus]);
@@ -97,11 +109,15 @@ const Transaksi = () => {
     });
 
     // Generate Tagihan Bulanan (Massal)
-    const handleGenerateTagihan = async () => {
-        if (!window.confirm(`Apakah Anda yakin ingin men-generate tagihan untuk periode ${filterBulan}/${filterTahun}?`)) {
-            return;
-        }
+    const handleGenerateTagihan = () => {
+        setConfirmModal({
+            isOpen: true,
+            message: `Apakah Anda yakin ingin men-generate tagihan untuk periode ${getNamaBulan(filterBulan)} ${filterTahun}?`,
+            onConfirm: () => executeGenerateTagihan()
+        });
+    };
 
+    const executeGenerateTagihan = async () => {
         try {
             setGenLoading(true);
             const res = await api.post('/tagihan/generate', {
@@ -110,14 +126,26 @@ const Transaksi = () => {
             });
 
             if (res.data && res.data.status === 'success') {
-                alert(res.data.message);
+                setAlertModal({
+                    isOpen: true,
+                    type: 'success',
+                    message: res.data.message
+                });
                 fetchTransactions();
             } else {
-                alert(res.data.message || 'Gagal men-generate tagihan');
+                setAlertModal({
+                    isOpen: true,
+                    type: 'error',
+                    message: res.data.message || 'Gagal men-generate tagihan'
+                });
             }
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Terjadi kesalahan sistem');
+            setAlertModal({
+                isOpen: true,
+                type: 'error',
+                message: err.response?.data?.message || 'Terjadi kesalahan sistem'
+            });
         } finally {
             setGenLoading(false);
         }
@@ -510,6 +538,80 @@ const Transaksi = () => {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================== */}
+            {/* MODAL: CUSTOM CONFIRM DIALOG */}
+            {/* ============================================================== */}
+            {confirmModal.isOpen && (
+                <div className="fixed inset-0 bg-emerald-950/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden border border-emerald-50/50 shadow-2xl animate-scale-in">
+                        <div className="p-6 text-center">
+                            <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+                                <Calendar size={24} />
+                            </div>
+                            <h3 className="text-base font-bold text-emerald-950">Konfirmasi Tindakan</h3>
+                            <p className="text-xs text-gray-500 mt-2 px-2 leading-relaxed">
+                                {confirmModal.message}
+                            </p>
+                        </div>
+
+                        <div className="px-6 py-4 bg-emerald-50/20 border-t border-emerald-50/50 flex items-center justify-end gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                                className="px-4 py-2 text-sm font-semibold text-emerald-700 bg-white hover:bg-emerald-50 rounded-xl transition-all border border-emerald-100 cursor-pointer"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                                    if (confirmModal.onConfirm) confirmModal.onConfirm();
+                                }}
+                                className="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all cursor-pointer shadow-sm"
+                            >
+                                Ya, Lanjutkan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================== */}
+            {/* MODAL: CUSTOM ALERT DIALOG */}
+            {/* ============================================================== */}
+            {alertModal.isOpen && (
+                <div className="fixed inset-0 bg-emerald-950/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-3xl w-full max-w-sm overflow-hidden border border-emerald-50/50 shadow-2xl animate-scale-in">
+                        <div className="p-6 text-center">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 border ${
+                                alertModal.type === 'success' 
+                                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                                    : 'bg-red-50 text-red-500 border-red-100'
+                            }`}>
+                                {alertModal.type === 'success' ? <CheckCircle size={24} /> : <AlertCircle size={24} />}
+                            </div>
+                            <h3 className="text-base font-bold text-emerald-950">
+                                {alertModal.type === 'success' ? 'Berhasil' : 'Perhatian'}
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-2 px-2 leading-relaxed">
+                                {alertModal.message}
+                            </p>
+                        </div>
+
+                        <div className="px-6 py-4 bg-emerald-50/20 border-t border-emerald-50/50 flex items-center justify-center">
+                            <button
+                                type="button"
+                                onClick={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+                                className="px-6 py-2 text-sm font-semibold text-emerald-700 bg-white hover:bg-emerald-50 rounded-xl transition-all border border-emerald-100 cursor-pointer"
+                            >
+                                Tutup
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
