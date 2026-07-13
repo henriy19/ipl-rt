@@ -74,7 +74,13 @@ const Laporan = () => {
     const handleDownloadPDF = () => {
         if (!rekapData) return;
 
-        const printWindow = window.open('', '_blank');
+        // Create temporary container element off-screen
+        const element = document.createElement('div');
+        element.style.position = 'absolute';
+        element.style.left = '-9999px';
+        element.style.top = '0';
+        element.style.width = '800px';
+        element.style.background = '#ffffff';
         
         // Buat baris tabel pemasukan
         const pemasukanRows = rekapData.rekap_pemasukan_bulanan.map(item => `
@@ -112,110 +118,129 @@ const Laporan = () => {
             }).join('')
             : `<tr><td colspan="7" style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #777;">Tidak ada data tagihan warga pada periode ini.</td></tr>`;
 
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Laporan Keuangan Wargatify - Tahun ${rekapData.tahun}</title>
-                    <style>
-                        body { font-family: 'Inter', sans-serif; color: #1a202c; padding: 20px; line-height: 1.5; }
-                        .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 12px; margin-bottom: 25px; }
-                        .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; }
-                        .header p { margin: 4px 0 0 0; font-size: 13px; color: #4b5563; }
-                        .meta-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; }
-                        .summary-cards { display: grid; grid-template-cols: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-                        .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; background: #f8fafc; }
-                        .card-title { font-size: 11px; text-transform: uppercase; color: #718096; font-weight: bold; letter-spacing: 0.5px; }
-                        .card-value { font-size: 18px; font-weight: bold; color: #1a202c; margin-top: 5px; }
-                        .table-title { font-size: 15px; font-weight: bold; color: #065f46; border-left: 4px solid #10b981; padding-left: 8px; margin: 20px 0 10px 0; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 12px; }
-                        th { background-color: #f1f5f9; padding: 10px 8px; border: 1px solid #ddd; font-weight: bold; text-align: left; }
-                        .signature-section { display: flex; justify-content: space-between; margin-top: 40px; font-size: 12px; }
-                        .signature-box { text-align: center; width: 200px; }
-                        .signature-space { height: 60px; }
-                        @media print {
-                            body { padding: 0; }
-                            button { display: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>Laporan Kas & Keuangan Wargatify</h1>
-                        <p>Lingkungan RT 01-02 / RW 010 - Kelurahan Wargatify Asri</p>
+        const filename = `Laporan_Keuangan_RT_${rekapData.tahun}_${rekapData.bulan_filter === 'Semua' ? 'Tahunan' : getNamaBulan(rekapData.bulan_filter)}.pdf`;
+
+        element.innerHTML = `
+            <style>
+                .pdf-body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a202c; padding: 30px; line-height: 1.5; background: #ffffff; }
+                .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 12px; margin-bottom: 25px; }
+                .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; }
+                .header p { margin: 4px 0 0 0; font-size: 13px; color: #4b5563; }
+                .meta-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; }
+                .summary-cards { display: grid; grid-template-cols: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+                .card { border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; background: #f8fafc; }
+                .card-title { font-size: 11px; text-transform: uppercase; color: #718096; font-weight: bold; letter-spacing: 0.5px; }
+                .card-value { font-size: 18px; font-weight: bold; color: #1a202c; margin-top: 5px; }
+                .table-title { font-size: 15px; font-weight: bold; color: #065f46; border-left: 4px solid #10b981; padding-left: 8px; margin: 20px 0 10px 0; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 12px; }
+                th { background-color: #f1f5f9; padding: 10px 8px; border: 1px solid #ddd; font-weight: bold; text-align: left; }
+                td { padding: 8px; border: 1px solid #ddd; }
+                .signature-section { display: flex; justify-content: space-between; margin-top: 40px; font-size: 12px; }
+                .signature-box { text-align: center; width: 200px; }
+                .signature-space { height: 60px; }
+            </style>
+            <div class="pdf-body">
+                <div class="header">
+                    <h1>Laporan Kas & Keuangan Wargatify</h1>
+                    <p>Lingkungan RT 01-02 / RW 010 - Kelurahan Wargatify Asri</p>
+                </div>
+
+                <div class="meta-info">
+                    <div><strong>Tanggal Laporan:</strong> ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}</div>
+                    <div><strong>Periode Laporan:</strong> ${rekapData.bulan_filter === 'Semua' ? 'Tahun ' + rekapData.tahun : getNamaBulan(rekapData.bulan_filter) + ' ' + rekapData.tahun}</div>
+                </div>
+
+                <div class="summary-cards">
+                    <div class="card">
+                        <div class="card-title">Total Uang Pemasukan (${rekapData.tahun})</div>
+                        <div class="card-value" style="color: #047857;">${formatRupiah(rekapData.total_pemasukan_tahunan)}</div>
                     </div>
-
-                    <div class="meta-info">
-                        <div><strong>Tanggal Laporan:</strong> ${new Date().toLocaleDateString('id-ID', { dateStyle: 'long' })}</div>
-                        <div><strong>Periode Laporan:</strong> Tahun ${rekapData.tahun}</div>
+                    <div class="card">
+                        <div class="card-title">Total Tunggakan Warga</div>
+                        <div class="card-value" style="color: #be123c;">${formatRupiah(rekapData.total_tunggakan)}</div>
                     </div>
+                </div>
 
-                    <div class="summary-cards">
-                        <div class="card">
-                            <div class="card-title">Total Uang Pemasukan (${rekapData.tahun})</div>
-                            <div class="card-value" style="color: #047857;">${formatRupiah(rekapData.total_pemasukan_tahunan)}</div>
-                        </div>
-                        <div class="card">
-                            <div class="card-title">Total Tunggakan Warga</div>
-                            <div class="card-value" style="color: #be123c;">${formatRupiah(rekapData.total_tunggakan)}</div>
-                        </div>
+                <div class="table-title">Rekapitulasi Pemasukan Kas per Bulan</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50%;">Bulan</th>
+                            <th style="text-align: right;">Total Pemasukan Lunas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${pemasukanRows}
+                    </tbody>
+                </table>
+
+                <div class="table-title">Daftar Status Pembayaran & Tagihan Warga (${rekapData.bulan_filter === 'Semua' ? 'Seluruh Bulan' : getNamaBulan(rekapData.bulan_filter)})</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 5%; text-align: center;">No</th>
+                            <th style="width: 25%;">Nama Lengkap</th>
+                            <th style="width: 20%;">Alamat Rumah</th>
+                            <th style="width: 15%;">Jenis Iuran</th>
+                            <th style="width: 12%; text-align: center;">Periode</th>
+                            <th style="width: 13%; text-align: center;">Status</th>
+                            <th style="width: 10%; text-align: right;">Nominal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tunggakanRows}
+                    </tbody>
+                </table>
+
+                <div class="signature-section">
+                    <div class="signature-box">
+                        <p>Mengetahui,</p>
+                        <p><strong>Ketua RT 001</strong></p>
+                        <div class="signature-space"></div>
+                        <p>___________________</p>
                     </div>
-
-                    <div class="table-title">Rekapitulasi Pemasukan Kas per Bulan</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 50%;">Bulan</th>
-                                <th style="text-align: right;">Total Pemasukan Lunas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${pemasukanRows}
-                        </tbody>
-                    </table>
-
-                    <div class="table-title">Daftar Status Pembayaran & Tagihan Warga (${rekapData.bulan_filter === 'Semua' ? 'Seluruh Bulan' : getNamaBulan(rekapData.bulan_filter)})</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 5%; text-align: center;">No</th>
-                                <th style="width: 25%;">Nama Lengkap</th>
-                                <th style="width: 20%;">Alamat Rumah</th>
-                                <th style="width: 15%;">Jenis Iuran</th>
-                                <th style="width: 12%; text-align: center;">Periode</th>
-                                <th style="width: 13%; text-align: center;">Status</th>
-                                <th style="width: 10%; text-align: right;">Nominal</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tunggakanRows}
-                        </tbody>
-                    </table>
-
-                    <div class="signature-section">
-                        <div class="signature-box">
-                            <p>Mengetahui,</p>
-                            <p><strong>Ketua RT 001</strong></p>
-                            <div class="signature-space"></div>
-                            <p>___________________</p>
-                        </div>
-                        <div class="signature-box">
-                            <p>Dicetak Oleh,</p>
-                            <p><strong>Bendahara RT</strong></p>
-                            <div class="signature-space"></div>
-                            <p><strong>${user?.nama_lengkap || 'Bendahara'}</strong></p>
-                        </div>
+                    <div class="signature-box">
+                        <p>Dicetak Oleh,</p>
+                        <p><strong>Bendahara RT</strong></p>
+                        <div class="signature-space"></div>
+                        <p><strong>${user?.nama_lengkap || 'Bendahara'}</strong></p>
                     </div>
+                </div>
+            </div>
+        `;
 
-                    <script>
-                        window.onload = function() {
-                            window.print();
-                            setTimeout(function() { window.close(); }, 500);
-                        }
-                    </script>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
+        document.body.appendChild(element);
+
+        // Dynamically load html2pdf.js from CDN
+        const loadScript = () => {
+            return new Promise((resolve) => {
+                if (window.html2pdf) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                script.onload = () => resolve();
+                document.head.appendChild(script);
+            });
+        };
+
+        loadScript().then(() => {
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            window.html2pdf().from(element).set(opt).save().then(() => {
+                element.remove();
+            }).catch(err => {
+                console.error('Error generating PDF:', err);
+                element.remove();
+            });
+        });
     };
 
     if (!isAuthorized) {
