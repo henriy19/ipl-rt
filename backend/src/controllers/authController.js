@@ -49,7 +49,7 @@ const login = async (req, res) => {
             rt_id: user.rt_id
         };
 
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1d' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'supersecretjwtkey_12345', { expiresIn: '1d' });
 
         res.json({
             message: 'Login berhasil',

@@ -7,7 +7,7 @@ const protect = (req, res, next) => {
         try {
             token = req.headers.authorization.split(' ')[1];
 
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'supersecretjwtkey_12345');
             
             // Simpan info user ke request object agar bisa diakses controller selanjutnya
             req.user = decoded;
