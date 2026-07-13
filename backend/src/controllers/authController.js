@@ -11,11 +11,11 @@ const login = async (req, res) => {
         }
 
         // Cari user berdasarkan no_hp
-        const [users] = await pool.query(`
+        const { rows: users } = await pool.query(`
             SELECT u.*, r.nama_role 
             FROM users u
             JOIN roles r ON u.role_id = r.id
-            WHERE u.no_hp = ? AND u.is_active = TRUE
+            WHERE u.no_hp = $1 AND u.is_active = TRUE
         `, [no_hp]);
 
         if (users.length === 0) {
@@ -31,11 +31,11 @@ const login = async (req, res) => {
         }
 
         // Ambil daftar akses menu untuk role user
-        const [menus] = await pool.query(`
+        const { rows: menus } = await pool.query(`
             SELECT m.path_url 
             FROM role_menus rm
             JOIN menus m ON rm.menu_id = m.id
-            WHERE rm.role_id = ? AND m.is_active = TRUE
+            WHERE rm.role_id = $1 AND m.is_active = TRUE
         `, [user.role_id]);
 
         const allowedPaths = menus.map(m => m.path_url);
