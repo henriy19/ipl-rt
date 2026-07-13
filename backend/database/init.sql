@@ -105,12 +105,16 @@ CREATE TABLE IF NOT EXISTS transaksi_pembayaran (
     diverifikasi_oleh VARCHAR(36),
     tanggal_verifikasi TIMESTAMP,
     catatan_bendahara TEXT,
+    metode_pembayaran VARCHAR(50) DEFAULT 'cash',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (tagihan_id) REFERENCES tagihan(id),
     FOREIGN KEY (dicatat_oleh) REFERENCES users(id),
     FOREIGN KEY (diverifikasi_oleh) REFERENCES users(id)
 );
+
+-- Ensure column exists for existing databases
+ALTER TABLE transaksi_pembayaran ADD COLUMN IF NOT EXISTS metode_pembayaran VARCHAR(50) DEFAULT 'cash';
 
 -- 10. Table: informasi (Fitur Informasi & Kegiatan)
 CREATE TABLE IF NOT EXISTS informasi (

@@ -6,6 +6,8 @@ const iuranRoutes = require('./routes/iuranRoutes');
 const rtRoutes = require('./routes/rtRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const informasiRoutes = require('./routes/informasiRoutes');
+const tagihanRoutes = require('./routes/tagihanRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 const path = require('path');
 const { responseFormatter, errorHandler } = require('./middlewares/errorMiddleware');
 
@@ -30,6 +32,8 @@ app.use('/api/iuran', iuranRoutes);
 app.use('/api/rt', rtRoutes);
 app.use('/api/roles', roleRoutes);
 app.use('/api/informasi', informasiRoutes);
+app.use('/api/tagihan', tagihanRoutes);
+app.use('/api/report', reportRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
