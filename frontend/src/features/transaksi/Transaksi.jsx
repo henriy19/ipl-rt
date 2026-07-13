@@ -519,15 +519,15 @@ const Transaksi = () => {
                                                 <div className="space-y-0.5">
                                                     <p>Metode: <strong className="capitalize text-emerald-950">{t.metode_pembayaran}</strong></p>
                                                     <p>Tgl Bayar: {new Date(t.tanggal_bayar).toLocaleDateString('id-ID')}</p>
-                                                    {t.pencatat_nama && <p>Dicatat: <span className="font-semibold text-emerald-900">{t.pencatat_nama}</span></p>}
-                                                    {t.verifikator_nama && <p>Diverifikasi: <span className="font-semibold text-teal-800">{t.verifikator_nama}</span></p>}
+                                                    {t.pencatat_nama && <p>Dicatat oleh: <span className="font-semibold text-emerald-900">{t.pencatat_nama}</span></p>}
+                                                    {t.verifikator_nama && <p>Diverifikasi oleh: <span className="font-semibold text-teal-800">{t.verifikator_nama}</span></p>}
                                                     {t.catatan_bendahara && <p className="italic mt-0.5">Note: "{t.catatan_bendahara}"</p>}
                                                 </div>
                                             ) : t.status === 'pending' ? (
                                                 <div className="space-y-0.5">
                                                     <p>Metode: <strong className="capitalize text-amber-600">{t.metode_pembayaran}</strong></p>
                                                     <p>Tgl Kirim: {new Date(t.tanggal_bayar).toLocaleDateString('id-ID')}</p>
-                                                    {t.pencatat_nama && <p>Dicatat: <span className="font-semibold text-emerald-900">{t.pencatat_nama}</span></p>}
+                                                    {t.pencatat_nama && <p>Dicatat oleh: <span className="font-semibold text-emerald-900">{t.pencatat_nama}</span></p>}
                                                     {t.catatan_bendahara && <p className="italic mt-0.5">Pesan: "{t.catatan_bendahara}"</p>}
                                                 </div>
                                             ) : (
