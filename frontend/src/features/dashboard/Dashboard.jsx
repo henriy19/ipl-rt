@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { 
   Users, 
   Wallet, 
@@ -10,16 +12,23 @@ import {
   Eye, 
   X, 
   Play, 
-  Video 
+  Video,
+  CheckCircle
 } from 'lucide-react';
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isWarga = user && user.nama_role === 'Warga';
+
   // Stats & Event States
   const [stats, setStats] = useState([
-    { title: 'Total Warga', value: '145', icon: <Users size={24} className="text-emerald-500" />, bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
-    { title: 'Total Pemasukan Bulan Ini', value: 'Rp 4.500.000', icon: <Wallet size={24} className="text-teal-500" />, bgColor: 'bg-teal-50', textColor: 'text-teal-700' },
-    { title: 'Total Tunggakan', value: 'Rp 1.250.000', icon: <AlertCircle size={24} className="text-orange-500" />, bgColor: 'bg-orange-50', textColor: 'text-orange-700' },
+    { title: isWarga ? 'Status Hunian' : 'Total Warga', value: '-', icon: <Users size={24} className="text-emerald-500" />, bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+    { title: isWarga ? 'Total Pembayaran Lunas' : 'Total Pemasukan Bulan Ini', value: '-', icon: <Wallet size={24} className="text-teal-500" />, bgColor: 'bg-teal-50', textColor: 'text-teal-700' },
+    { title: isWarga ? 'Tunggakan Belum Dibayar' : 'Total Tunggakan', value: '-', icon: <AlertCircle size={24} className="text-rose-500" />, bgColor: 'bg-rose-50', textColor: 'text-rose-700' },
   ]);
+  const [latestTx, setLatestTx] = useState([]);
+  const [txLoading, setTxLoading] = useState(true);
   const [latestEvents, setLatestEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -27,7 +36,57 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchLatestEvents();
+    fetchDashboardStats();
   }, []);
+
+  // Helper Rupiah
+  const formatRupiah = (value) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
+  // Helper Nama Bulan
+  const getNamaBulan = (num) => {
+    const daftarBulan = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return daftarBulan[num - 1] || '';
+  };
+
+  const fetchDashboardStats = async () => {
+    try {
+      setTxLoading(true);
+      const res = await api.get('/dashboard/stats');
+      if (res.data && res.data.status === 'success') {
+        const data = res.data.data;
+        
+        // Map stats cards
+        if (isWarga) {
+          setStats([
+            { title: 'Status Hunian', value: data.status_hunian ? data.status_hunian.toUpperCase() : '-', icon: <Users size={24} className="text-emerald-500" />, bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+            { title: 'Total Pembayaran Lunas', value: formatRupiah(data.total_lunas), icon: <Wallet size={24} className="text-teal-500" />, bgColor: 'bg-teal-50', textColor: 'text-teal-700' },
+            { title: 'Tunggakan Belum Dibayar', value: formatRupiah(data.total_tunggakan), icon: <AlertCircle size={24} className="text-rose-500" />, bgColor: 'bg-rose-50', textColor: 'text-rose-700' },
+          ]);
+        } else {
+          setStats([
+            { title: 'Total Warga', value: String(data.total_warga), icon: <Users size={24} className="text-emerald-500" />, bgColor: 'bg-emerald-50', textColor: 'text-emerald-700' },
+            { title: 'Total Pemasukan Bulan Ini', value: formatRupiah(data.pemasukan_bulan_ini), icon: <Wallet size={24} className="text-teal-500" />, bgColor: 'bg-teal-50', textColor: 'text-teal-700' },
+            { title: 'Total Tunggakan', value: formatRupiah(data.total_tunggakan), icon: <AlertCircle size={24} className="text-rose-500" />, bgColor: 'bg-rose-50', textColor: 'text-rose-700' },
+          ]);
+        }
+
+        setLatestTx(data.transaksi_terbaru || []);
+      }
+    } catch (err) {
+      console.error('Gagal memuat stats dashboard:', err);
+    } finally {
+      setTxLoading(false);
+    }
+  };
 
   const fetchLatestEvents = async () => {
     try {
@@ -127,13 +186,72 @@ const Dashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-emerald-950 tracking-tight">Transaksi Terbaru</h2>
-              <button className="text-sm text-emerald-700 hover:text-emerald-800 font-semibold bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors cursor-pointer">Lihat Semua</button>
+              <button 
+                onClick={() => navigate('/transaksi')}
+                className="text-sm text-emerald-700 hover:text-emerald-800 font-semibold bg-emerald-50 hover:bg-emerald-100 px-4 py-2 rounded-xl transition-colors cursor-pointer"
+              >
+                Lihat Semua
+              </button>
             </div>
-            <div className="text-center py-16 text-emerald-300 bg-[#F4F9F7] rounded-2xl border border-dashed border-emerald-200">
-              <TrendingUp size={48} className="mx-auto mb-4 text-emerald-200" />
-              <p className="font-semibold text-emerald-600">Belum ada transaksi bulan ini.</p>
-              <p className="text-sm mt-1 text-emerald-500/70">Pembayaran IPL warga akan muncul di sini.</p>
-            </div>
+
+            {txLoading ? (
+              <div className="py-20 flex flex-col items-center justify-center text-emerald-600">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mb-2"></div>
+                <p className="text-xs">Memuat transaksi...</p>
+              </div>
+            ) : latestTx.length === 0 ? (
+              <div className="text-center py-16 text-emerald-300 bg-[#F4F9F7] rounded-2xl border border-dashed border-emerald-200">
+                <TrendingUp size={48} className="mx-auto mb-4 text-emerald-200" />
+                <p className="font-semibold text-emerald-600">Belum ada transaksi saat ini.</p>
+                <p className="text-sm mt-1 text-emerald-500/70">Pembayaran IPL warga akan muncul di sini.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-emerald-50">
+                  <thead className="bg-emerald-50/20">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Warga / Rumah</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Periode</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Metode</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Status</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-emerald-800 uppercase">Nominal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-emerald-50/50">
+                    {latestTx.map((tx) => (
+                      <tr key={tx.tagihan_id} className="hover:bg-emerald-50/5 transition-colors">
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <p className="text-sm font-semibold text-emerald-950">{tx.nama_lengkap}</p>
+                          <p className="text-xs text-emerald-600 font-medium">Blok {tx.blok_rumah}/{tx.nomor_rumah}</p>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-xs text-emerald-600 font-semibold">
+                          {getNamaBulan(tx.bulan)} {tx.tahun}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-xs text-emerald-700 capitalize font-medium">
+                          {tx.metode_pembayaran || '-'}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-center">
+                          {tx.status === 'paid' ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                              <CheckCircle size={10} />
+                              Lunas
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">
+                              <AlertCircle size={10} />
+                              Pending Verif
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-bold text-emerald-700 text-right">
+                          {formatRupiah(tx.nominal_tagihan)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 

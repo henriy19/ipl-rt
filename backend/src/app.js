@@ -8,6 +8,7 @@ const roleRoutes = require('./routes/roleRoutes');
 const informasiRoutes = require('./routes/informasiRoutes');
 const tagihanRoutes = require('./routes/tagihanRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 const path = require('path');
 const { responseFormatter, errorHandler } = require('./middlewares/errorMiddleware');
 
@@ -34,6 +35,7 @@ app.use('/api/roles', roleRoutes);
 app.use('/api/informasi', informasiRoutes);
 app.use('/api/tagihan', tagihanRoutes);
 app.use('/api/report', reportRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
