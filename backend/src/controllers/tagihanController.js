@@ -151,11 +151,32 @@ const VerifikasiPembayaran = async (req, res, next) => {
     }
 };
 
+const ClearTagihan = async (req, res, next) => {
+    try {
+        const { bulan, tahun } = req.body;
+
+        if (!bulan || !tahun) {
+            return res.error('Bulan dan tahun harus ditentukan', 400);
+        }
+
+        const result = await Tagihan.clearTagihan(parseInt(bulan, 10), parseInt(tahun, 10));
+
+        if (!result.success) {
+            return res.error('Gagal menghapus tagihan periode ini', 400);
+        }
+
+        return res.success(`Berhasil menghapus ${result.count} tagihan periode ${bulan}/${tahun}.`);
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     GenerateTagihan,
     GetAllTagihan,
     GetWargaHistory,
     BayarTagihan,
     SubmitPembayaran,
-    VerifikasiPembayaran
+    VerifikasiPembayaran,
+    ClearTagihan
 };

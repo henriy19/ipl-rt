@@ -12,12 +12,14 @@ import {
     CreditCard, 
     TrendingUp, 
     Calendar,
-    ArrowUpRight
+    ArrowUpRight,
+    Trash2
 } from 'lucide-react';
 
 const Transaksi = () => {
     const { user } = useAuth();
     const isAuthorized = user && ['Admin', 'Petugas', 'Bendahara'].includes(user.nama_role);
+    const isAdmin = user && user.nama_role === 'Admin';
 
     // Filter States
     const now = new Date();
@@ -43,6 +45,7 @@ const Transaksi = () => {
 
     const [payMode, setPayMode] = useState('direct'); // 'direct', 'verify', 'submit'
     const [genLoading, setGenLoading] = useState(false);
+    const [clearLoading, setClearLoading] = useState(false);
 
     // Custom Dialog States
     const [confirmModal, setConfirmModal] = useState({
@@ -152,6 +155,49 @@ const Transaksi = () => {
         }
     };
 
+    // Clear Tagihan Bulanan (Admin Only)
+    const handleClearTagihan = () => {
+        setConfirmModal({
+            isOpen: true,
+            message: `Apakah Anda yakin ingin menghapus seluruh data tagihan dan riwayat pembayaran untuk periode ${getNamaBulan(filterBulan)} ${filterTahun}? Tindakan ini TIDAK dapat dibatalkan!`,
+            onConfirm: () => executeClearTagihan()
+        });
+    };
+
+    const executeClearTagihan = async () => {
+        try {
+            setClearLoading(true);
+            const res = await api.post('/tagihan/clear', {
+                bulan: filterBulan,
+                tahun: filterTahun
+            });
+
+            if (res.data && res.data.status === 'success') {
+                setAlertModal({
+                    isOpen: true,
+                    type: 'success',
+                    message: res.data.message
+                });
+                fetchTransactions();
+            } else {
+                setAlertModal({
+                    isOpen: true,
+                    type: 'error',
+                    message: res.data.message || 'Gagal menghapus tagihan'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            setAlertModal({
+                isOpen: true,
+                type: 'error',
+                message: err.response?.data?.message || 'Terjadi kesalahan sistem'
+            });
+        } finally {
+            setClearLoading(false);
+        }
+    };
+
     // Open Modal Pembayaran
     const openPayModal = (tagihan, mode = 'direct') => {
         setSelectedTagihan(tagihan);
@@ -233,25 +279,46 @@ const Transaksi = () => {
                             : 'Lihat riwayat tagihan bulanan dan bukti pembayaran Anda.'}
                     </p>
                 </div>
-                {isAuthorized && (
-                    <button 
-                        onClick={handleGenerateTagihan}
-                        disabled={genLoading}
-                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold text-sm rounded-xl shadow-sm transition-all cursor-pointer"
-                    >
-                        {genLoading ? (
-                            <>
-                                <Loader2 size={18} className="animate-spin" />
-                                <span>Generating...</span>
-                            </>
-                        ) : (
-                            <>
-                                <ArrowUpRight size={18} />
-                                <span>Generate Tagihan Bulanan</span>
-                            </>
-                        )}
-                    </button>
-                )}
+                <div className="flex flex-wrap items-center gap-3">
+                    {isAdmin && (
+                        <button 
+                            onClick={handleClearTagihan}
+                            disabled={clearLoading}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:bg-rose-400 text-white font-semibold text-sm rounded-xl shadow-sm transition-all cursor-pointer"
+                        >
+                            {clearLoading ? (
+                                <>
+                                    <Loader2 size={18} className="animate-spin" />
+                                    <span>Menghapus...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 size={18} />
+                                    <span>Hapus Tagihan Periode Ini</span>
+                                </>
+                            )}
+                        </button>
+                    )}
+                    {isAuthorized && (
+                        <button 
+                            onClick={handleGenerateTagihan}
+                            disabled={genLoading}
+                            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold text-sm rounded-xl shadow-sm transition-all cursor-pointer"
+                        >
+                            {genLoading ? (
+                                <>
+                                    <Loader2 size={18} className="animate-spin" />
+                                    <span>Generating...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <ArrowUpRight size={18} />
+                                    <span>Generate Tagihan Bulanan</span>
+                                </>
+                            )}
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* Stats Overview (Hanya untuk Admin/Bendahara) */}

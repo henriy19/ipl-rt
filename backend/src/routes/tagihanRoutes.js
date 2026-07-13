@@ -5,7 +5,8 @@ const {
     GetWargaHistory,
     BayarTagihan,
     SubmitPembayaran,
-    VerifikasiPembayaran
+    VerifikasiPembayaran,
+    ClearTagihan
 } = require('../controllers/tagihanController');
 const { protect } = require('../middlewares/authMiddleware');
 
@@ -32,6 +33,9 @@ router.get('/history', GetWargaHistory);
 
 // Rute untuk generate tagihan baru
 router.post('/generate', authorizeRoles('Admin', 'Petugas', 'Bendahara'), GenerateTagihan);
+
+// Rute untuk membersihkan seluruh tagihan periode bulan/tahun tertentu (Khusus Admin)
+router.post('/clear', authorizeRoles('Admin'), ClearTagihan);
 
 // Rute untuk melihat seluruh data tagihan (Admin)
 router.get('/', authorizeRoles('Admin', 'Petugas', 'Bendahara'), GetAllTagihan);

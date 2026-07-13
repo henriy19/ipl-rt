@@ -311,6 +311,35 @@ const Tagihan = {
         } finally {
             client.release();
         }
+    },
+
+    // Clear bills and payments for a specific period (Admin only)
+    async clearTagihan(bulan, tahun) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // 1. Delete associated payments first
+            const deletePaymentsQuery = `
+                DELETE FROM transaksi_pembayaran 
+                WHERE tagihan_id IN (SELECT id FROM tagihan WHERE bulan = $1 AND tahun = $2)
+            `;
+            await client.query(deletePaymentsQuery, [bulan, tahun]);
+
+            // 2. Delete the bills
+            const deleteBillsQuery = `
+                DELETE FROM tagihan WHERE bulan = $1 AND tahun = $2
+            `;
+            const result = await client.query(deleteBillsQuery, [bulan, tahun]);
+
+            await client.query('COMMIT');
+            return { success: true, count: result.rowCount };
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 };
 
