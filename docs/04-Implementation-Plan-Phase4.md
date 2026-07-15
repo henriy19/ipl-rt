@@ -56,6 +56,18 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`frontend/src/features/dashboard/Dashboard.jsx` [MODIFY]**: Integrasi widget 5 Kegiatan RT-RW Terkini lengkap dengan detail modal.
 - **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Penambahan menu "Informasi Kegiatan" (Megaphone icon).
 
+### 7. Fitur CRUD & Manajemen Wilayah RT-RW (Baru)
+- **`backend/src/models/rwModel.js` [NEW]**: Query PostgreSQL aman untuk CRUD tabel `master_rw` dan verifikasi relasi RT.
+- **`backend/src/controllers/rwController.js` [NEW]**: Logic API Rukun Warga (RW) dengan format response `res.success` & `res.error`.
+- **`backend/src/routes/rwRoutes.js` [NEW]**: Endpoint `/api/rw` terproteksi token JWT & hak akses pengurus (RBAC).
+- **`backend/src/models/rtModel.js` [MODIFY]**: Kueri PostgreSQL untuk CRUD tabel `master_rt`, verifikasi relasi `users`, dan filter `showAll` status aktif.
+- **`backend/src/controllers/rtController.js` [MODIFY]**: Logic API Rukun Tetangga (RT), validasi duplikasi nomor RT per RW, dan batasan penghapusan RT jika memiliki warga.
+- **`backend/src/routes/rtRoutes.js` [MODIFY]**: Pendaftaran endpoint CRUD RT terproteksi token JWT & RBAC.
+- **`backend/src/app.js` [MODIFY]**: Registrasi router `/api/rw`.
+- **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Penambahan menu "Master RT-RW" (Map icon) pada kelompok Data Master.
+- **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/rt-rw` dengan layout terproteksi.
+- **`frontend/src/features/master/RtRw.jsx` [NEW]**: Halaman manajemen RT-RW berformat tabbed layout (Tab RT & Tab RW) lengkap dengan metrik statistik, filter pencarian, dan modal interaktif CRUD.
+
 ---
 
 ## Verification Plan
@@ -73,3 +85,8 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
    - Memverifikasi pembaruan data dan penghapusan informasi kegiatan secara real-time.
    - Memastikan modal detail dapat menampilkan gambar dan memutar video secara dinamis (Youtube/MP4).
    - Memastikan warga biasa tidak dapat melakukan aksi tulis/CRUD (RBAC) pada data informasi.
+5. **RT-RW CRUD Management Verification**:
+   - Memverifikasi penambahan data RW & RT baru dari halaman Master RT-RW.
+   - Memverifikasi pencegahan duplikasi nomor RT pada RW yang sama.
+   - Memverifikasi integrasi validasi relasi asing: Penolakan hapus RW jika masih memiliki RT, dan penolakan hapus RT jika masih memiliki warga.
+   - Memverifikasi bahwa data RT/RW yang baru dibuat langsung tersinkronisasi di dropdown pendaftaran Data Warga.
