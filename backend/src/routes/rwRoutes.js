@@ -1,11 +1,11 @@
 const express = require('express');
 const { 
-    GetAllRT, 
-    GetRTById, 
-    CreateRT, 
-    UpdateRT, 
-    DeleteRT 
-} = require('../controllers/rtController');
+    GetAllRW, 
+    GetRWById, 
+    CreateRW, 
+    UpdateRW, 
+    DeleteRW 
+} = require('../controllers/rwController');
 const { protect } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -23,14 +23,14 @@ const authorizeRoles = (...allowedRoles) => {
     };
 };
 
-// Rute manajemen Rukun Tetangga (RT)
+// Rute manajemen Rukun Warga (RW)
 router.route('/')
-    .get(GetAllRT)
-    .post(authorizeRoles('Admin', 'Petugas', 'Bendahara'), CreateRT);
+    .get(GetAllRW)
+    .post(authorizeRoles('Admin', 'Petugas', 'Bendahara'), CreateRW);
 
 router.route('/:id')
-    .get(GetRTById)
-    .put(authorizeRoles('Admin', 'Petugas', 'Bendahara'), UpdateRT)
-    .delete(authorizeRoles('Admin', 'Petugas', 'Bendahara'), DeleteRT);
+    .get(GetRWById)
+    .put(authorizeRoles('Admin', 'Petugas', 'Bendahara'), UpdateRW)
+    .delete(authorizeRoles('Admin', 'Petugas', 'Bendahara'), DeleteRW);
 
 module.exports = router;
