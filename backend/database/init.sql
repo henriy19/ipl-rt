@@ -131,6 +131,18 @@ CREATE TABLE IF NOT EXISTS informasi (
 );
 
 
+-- 11. Table: master_petugas (Fitur Petugas Management)
+CREATE TABLE IF NOT EXISTS master_petugas (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL UNIQUE,
+    jabatan VARCHAR(100) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+
 -- ==========================================
 -- SEED DATA (DUMMY DATA)
 -- ==========================================

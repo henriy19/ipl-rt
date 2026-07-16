@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Users, CreditCard, ReceiptText, FileBarChart, X, Shield, Megaphone, Map } from 'lucide-react';
+import { LayoutDashboard, Users, CreditCard, ReceiptText, FileBarChart, X, Shield, Megaphone, Map, Contact } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
@@ -15,6 +15,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Master Role', path: '/role', icon: <Shield size={20} /> },
     { name: 'Master Iuran', path: '/iuran', icon: <CreditCard size={20} /> },
     { name: 'Master RT-RW', path: '/rt-rw', icon: <Map size={20} /> },
+    { name: 'Master Petugas', path: '/petugas', icon: <Contact size={20} /> },
   ];
 
   return (

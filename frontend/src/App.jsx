@@ -11,6 +11,7 @@ import Transaksi from './features/transaksi/Transaksi';
 import Laporan from './features/laporan/Laporan';
 import Role from './features/master/Role';
 import RtRw from './features/master/RtRw';
+import Petugas from './features/master/Petugas';
 import Informasi from './features/informasi/Informasi';
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="laporan" element={<Laporan />} />
             <Route path="role" element={<Role />} />
             <Route path="rt-rw" element={<RtRw />} />
+            <Route path="petugas" element={<Petugas />} />
             <Route path="informasi" element={<Informasi />} />
           </Route>
           
