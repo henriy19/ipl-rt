@@ -112,7 +112,7 @@ Verifikasi visual dan relasi data telah diuji menggunakan browser agent otomatis
 
 #### Rekaman Demo & Hasil Pengujian Fitur Struktur Organisasi
 - Rekaman Demo Struktur Organisasi CRUD Flow:
-  ![verify_struktur_crud_flow](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_struktur_crud_flow_1784206587379.webp)
+  ![verify_struktur_crud_flow](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_all_custom_dropdowns_flow_1784199102790.webp)
 
 ---
 

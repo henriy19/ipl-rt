@@ -55,6 +55,14 @@ const StrukturOrganisasi = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [wargaSearchTerm, setWargaSearchTerm] = useState('');
 
+    // Custom Dropdown States for Pilih Jabatan (Role)
+    const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+    const [roleSearchTerm, setRoleSearchTerm] = useState('');
+
+    // Custom Dropdown States for Pilih RT
+    const [isRtDropdownOpen, setIsRtDropdownOpen] = useState(false);
+    const [rtSearchTerm, setRtSearchTerm] = useState('');
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -124,6 +132,32 @@ const StrukturOrganisasi = () => {
         setWargaSearchTerm('');
     };
 
+    // Filter available roles berdasarkan search inside dropdown
+    const filteredAvailableRoles = roleList.filter(r => {
+        const q = roleSearchTerm.toLowerCase();
+        return r.nama_role.toLowerCase().includes(q);
+    });
+
+    // Filter available RT berdasarkan search inside dropdown
+    const filteredAvailableRts = rtList.filter(rt => {
+        const q = rtSearchTerm.toLowerCase();
+        return rt.nomor_rt.includes(q) || rt.nomor_rw.includes(q);
+    });
+
+    // Handler untuk memilih jabatan (role)
+    const handleSelectRole = (roleId) => {
+        setFormData(prev => ({ ...prev, role_id: roleId }));
+        setIsRoleDropdownOpen(false);
+        setRoleSearchTerm('');
+    };
+
+    // Handler untuk memilih RT penugasan
+    const handleSelectRt = (rtId) => {
+        setFormData(prev => ({ ...prev, rt_id: rtId }));
+        setIsRtDropdownOpen(false);
+        setRtSearchTerm('');
+    };
+
     // Form Change Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -148,6 +182,10 @@ const StrukturOrganisasi = () => {
         setFormError('');
         setIsDropdownOpen(false);
         setWargaSearchTerm('');
+        setIsRoleDropdownOpen(false);
+        setRoleSearchTerm('');
+        setIsRtDropdownOpen(false);
+        setRtSearchTerm('');
         setIsAddOpen(true);
     };
 
@@ -160,6 +198,10 @@ const StrukturOrganisasi = () => {
             is_active: s.is_active ? 1 : 0
         });
         setFormError('');
+        setIsRoleDropdownOpen(false);
+        setRoleSearchTerm('');
+        setIsRtDropdownOpen(false);
+        setRtSearchTerm('');
         setIsEditOpen(true);
     };
 
@@ -244,6 +286,8 @@ const StrukturOrganisasi = () => {
     };
 
     const selectedWargaObj = availableWarga.find(w => w.id === formData.user_id);
+    const selectedRoleObj = roleList.find(r => r.id === formData.role_id);
+    const selectedRtObj = rtList.find(rt => rt.id === formData.rt_id);
 
     return (
         <div className="space-y-6">
@@ -539,19 +583,66 @@ const StrukturOrganisasi = () => {
                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Jabatan (Role) *</label>
                                 <div className="relative">
-                                    <select
-                                        name="role_id"
-                                        value={formData.role_id}
-                                        onChange={handleInputChange}
-                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
-                                        required
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
                                     >
-                                        {roleList.map((r) => (
-                                            <option key={r.id} value={r.id}>
-                                                {r.nama_role}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        {selectedRoleObj ? (
+                                            <span className="block truncate font-medium">{selectedRoleObj.nama_role}</span>
+                                        ) : (
+                                            <span className="text-gray-400">Pilih Jabatan...</span>
+                                        )}
+                                        <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </button>
+
+                                    {isRoleDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => { setIsRoleDropdownOpen(false); setRoleSearchTerm(''); }}></div>
+                                            <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            value={roleSearchTerm}
+                                                            onChange={(e) => setRoleSearchTerm(e.target.value)}
+                                                            placeholder="Cari jabatan..."
+                                                            className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                        />
+                                                        <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                    {filteredAvailableRoles.length === 0 ? (
+                                                        <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
+                                                            Tidak ada jabatan yang cocok
+                                                        </div>
+                                                    ) : (
+                                                        filteredAvailableRoles.map((r) => {
+                                                            const isSelected = r.id === formData.role_id;
+                                                            return (
+                                                                <div
+                                                                    key={r.id}
+                                                                    onClick={() => handleSelectRole(r.id)}
+                                                                    className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                        isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                    }`}
+                                                                >
+                                                                    <span className="font-semibold text-emerald-950">{r.nama_role}</span>
+                                                                    {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -559,19 +650,72 @@ const StrukturOrganisasi = () => {
                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">RT Penugasan</label>
                                 <div className="relative">
-                                    <select
-                                        name="rt_id"
-                                        value={formData.rt_id}
-                                        onChange={handleInputChange}
-                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRtDropdownOpen(!isRtDropdownOpen)}
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
                                     >
-                                        <option value="">-- Seluruh Wilayah (Lokal/RW) --</option>
-                                        {rtList.map((rt) => (
-                                            <option key={rt.id} value={rt.id}>
-                                                RT {rt.nomor_rt} / RW {rt.nomor_rw}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        {selectedRtObj ? (
+                                            <span className="block truncate font-medium">RT {selectedRtObj.nomor_rt} / RW {selectedRtObj.nomor_rw}</span>
+                                        ) : (
+                                            <span className="block truncate text-emerald-600/80 font-medium">-- Seluruh Wilayah (Lokal/RW) --</span>
+                                        )}
+                                        <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </button>
+
+                                    {isRtDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => { setIsRtDropdownOpen(false); setRtSearchTerm(''); }}></div>
+                                            <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            value={rtSearchTerm}
+                                                            onChange={(e) => setRtSearchTerm(e.target.value)}
+                                                            placeholder="Cari RT..."
+                                                            className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                        />
+                                                        <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                    <div
+                                                        onClick={() => handleSelectRt('')}
+                                                        className={`px-4 py-2.5 text-xs text-emerald-600 font-semibold hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                            formData.rt_id === '' ? 'bg-emerald-50/50 font-bold' : ''
+                                                        }`}
+                                                    >
+                                                        <span>-- Seluruh Wilayah (Lokal/RW) --</span>
+                                                        {formData.rt_id === '' && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                    </div>
+
+                                                    {filteredAvailableRts.length > 0 && (
+                                                        filteredAvailableRts.map((rt) => {
+                                                            const isSelected = rt.id === formData.rt_id;
+                                                            return (
+                                                                <div
+                                                                    key={rt.id}
+                                                                    onClick={() => handleSelectRt(rt.id)}
+                                                                    className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                        isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                    }`}
+                                                                >
+                                                                    <span className="font-semibold text-emerald-950">RT {rt.nomor_rt} / RW {rt.nomor_rw}</span>
+                                                                    {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -673,19 +817,66 @@ const StrukturOrganisasi = () => {
                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Jabatan (Role) *</label>
                                 <div className="relative">
-                                    <select
-                                        name="role_id"
-                                        value={formData.role_id}
-                                        onChange={handleInputChange}
-                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
-                                        required
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
                                     >
-                                        {roleList.map((r) => (
-                                            <option key={r.id} value={r.id}>
-                                                {r.nama_role}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        {selectedRoleObj ? (
+                                            <span className="block truncate font-medium">{selectedRoleObj.nama_role}</span>
+                                        ) : (
+                                            <span className="text-gray-400">Pilih Jabatan...</span>
+                                        )}
+                                        <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </button>
+
+                                    {isRoleDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => { setIsRoleDropdownOpen(false); setRoleSearchTerm(''); }}></div>
+                                            <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            value={roleSearchTerm}
+                                                            onChange={(e) => setRoleSearchTerm(e.target.value)}
+                                                            placeholder="Cari jabatan..."
+                                                            className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                        />
+                                                        <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                    {filteredAvailableRoles.length === 0 ? (
+                                                        <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
+                                                            Tidak ada jabatan yang cocok
+                                                        </div>
+                                                    ) : (
+                                                        filteredAvailableRoles.map((r) => {
+                                                            const isSelected = r.id === formData.role_id;
+                                                            return (
+                                                                <div
+                                                                    key={r.id}
+                                                                    onClick={() => handleSelectRole(r.id)}
+                                                                    className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                        isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                    }`}
+                                                                >
+                                                                    <span className="font-semibold text-emerald-950">{r.nama_role}</span>
+                                                                    {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
@@ -693,19 +884,72 @@ const StrukturOrganisasi = () => {
                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">RT Penugasan</label>
                                 <div className="relative">
-                                    <select
-                                        name="rt_id"
-                                        value={formData.rt_id}
-                                        onChange={handleInputChange}
-                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsRtDropdownOpen(!isRtDropdownOpen)}
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
                                     >
-                                        <option value="">-- Seluruh Wilayah (Lokal/RW) --</option>
-                                        {rtList.map((rt) => (
-                                            <option key={rt.id} value={rt.id}>
-                                                RT {rt.nomor_rt} / RW {rt.nomor_rw}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        {selectedRtObj ? (
+                                            <span className="block truncate font-medium">RT {selectedRtObj.nomor_rt} / RW {selectedRtObj.nomor_rw}</span>
+                                        ) : (
+                                            <span className="block truncate text-emerald-600/80 font-medium">-- Seluruh Wilayah (Lokal/RW) --</span>
+                                        )}
+                                        <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </button>
+
+                                    {isRtDropdownOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => { setIsRtDropdownOpen(false); setRtSearchTerm(''); }}></div>
+                                            <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            value={rtSearchTerm}
+                                                            onChange={(e) => setRtSearchTerm(e.target.value)}
+                                                            placeholder="Cari RT..."
+                                                            className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                        />
+                                                        <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                    </div>
+                                                </div>
+
+                                                <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                    <div
+                                                        onClick={() => handleSelectRt('')}
+                                                        className={`px-4 py-2.5 text-xs text-emerald-600 font-semibold hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                            formData.rt_id === '' ? 'bg-emerald-50/50 font-bold' : ''
+                                                        }`}
+                                                    >
+                                                        <span>-- Seluruh Wilayah (Lokal/RW) --</span>
+                                                        {formData.rt_id === '' && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                    </div>
+
+                                                    {filteredAvailableRts.length > 0 && (
+                                                        filteredAvailableRts.map((rt) => {
+                                                            const isSelected = rt.id === formData.rt_id;
+                                                            return (
+                                                                <div
+                                                                    key={rt.id}
+                                                                    onClick={() => handleSelectRt(rt.id)}
+                                                                    className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                        isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                    }`}
+                                                                >
+                                                                    <span className="font-semibold text-emerald-950">RT {rt.nomor_rt} / RW {rt.nomor_rw}</span>
+                                                                    {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
