@@ -131,15 +131,20 @@ CREATE TABLE IF NOT EXISTS informasi (
 );
 
 
--- 11. Table: master_petugas (Fitur Petugas Management)
-CREATE TABLE IF NOT EXISTS master_petugas (
+DROP TABLE IF EXISTS master_petugas CASCADE;
+
+-- 11. Table: master_struktur (Fitur Struktur Organisasi Management)
+CREATE TABLE IF NOT EXISTS master_struktur (
     id VARCHAR(36) PRIMARY KEY,
     user_id VARCHAR(36) NOT NULL UNIQUE,
-    jabatan VARCHAR(100) NOT NULL,
+    role_id VARCHAR(36) NOT NULL,
+    rt_id VARCHAR(36),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+    FOREIGN KEY (rt_id) REFERENCES master_rt(id) ON DELETE SET NULL
 );
 
 

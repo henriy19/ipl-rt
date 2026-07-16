@@ -16,23 +16,23 @@ import {
     Info,
     CheckCircle,
     UserCheck,
-    Briefcase
+    Briefcase,
+    Shield,
+    MapPin
 } from 'lucide-react';
 
-const Petugas = () => {
+const StrukturOrganisasi = () => {
     const { user } = useAuth();
     const isAuthorized = user && ['Admin', 'Petugas', 'Bendahara'].includes(user.nama_role);
 
     // List States
-    const [petugasList, setPetugasList] = useState([]);
+    const [strukturList, setStrukturList] = useState([]);
     const [wargaList, setWargaList] = useState([]);
+    const [roleList, setRoleList] = useState([]);
+    const [rtList, setRtList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-
-    // Custom Dropdown States for Pilih Warga
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [wargaSearchTerm, setWargaSearchTerm] = useState('');
 
     // Modal Control States
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -40,15 +40,20 @@ const Petugas = () => {
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-    // Selected Petugas and Form States
-    const [selectedPetugas, setSelectedPetugas] = useState(null);
+    // Selected Pengurus and Form States
+    const [selectedPengurus, setSelectedPengurus] = useState(null);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [formError, setFormError] = useState('');
     const [formData, setFormData] = useState({
         user_id: '',
-        jabatan: '',
+        role_id: '',
+        rt_id: '',
         is_active: 1
     });
+
+    // Custom Dropdown States for Pilih Warga
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [wargaSearchTerm, setWargaSearchTerm] = useState('');
 
     useEffect(() => {
         fetchData();
@@ -59,36 +64,47 @@ const Petugas = () => {
             setLoading(true);
             setError('');
             
-            const petugasRes = await api.get('/petugas');
-            const wargaRes = await api.get('/users');
+            const [strukturRes, wargaRes, roleRes, rtRes] = await Promise.all([
+                api.get('/struktur'),
+                api.get('/users'),
+                api.get('/roles'),
+                api.get('/rt?all=true')
+            ]);
 
-            if (petugasRes.data && petugasRes.data.status === 'success') {
-                setPetugasList(petugasRes.data.data);
+            if (strukturRes.data && strukturRes.data.status === 'success') {
+                setStrukturList(strukturRes.data.data);
             }
             if (wargaRes.data && wargaRes.data.status === 'success') {
                 setWargaList(wargaRes.data.data);
             }
+            if (roleRes.data && roleRes.data.status === 'success') {
+                setRoleList(roleRes.data.data);
+            }
+            if (rtRes.data && rtRes.data.status === 'success') {
+                setRtList(rtRes.data.data);
+            }
         } catch (err) {
             console.error('Error fetching data:', err);
-            setError(err.response?.data?.message || 'Gagal memuat data petugas');
+            setError(err.response?.data?.message || 'Gagal memuat data struktur organisasi');
         } finally {
             setLoading(false);
         }
     };
 
-    // Filter petugas berdasarkan pencarian
-    const filteredPetugas = petugasList.filter((p) => {
+    // Filter struktur berdasarkan pencarian
+    const filteredStruktur = strukturList.filter((s) => {
         const query = searchTerm.toLowerCase();
         return (
-            p.nama_lengkap.toLowerCase().includes(query) ||
-            p.no_hp.toLowerCase().includes(query) ||
-            p.jabatan.toLowerCase().includes(query)
+            s.nama_lengkap.toLowerCase().includes(query) ||
+            s.no_hp.toLowerCase().includes(query) ||
+            s.jabatan.toLowerCase().includes(query) ||
+            (s.nomor_rt && s.nomor_rt.includes(query))
         );
     });
 
-    // Warga yang belum didaftarkan sebagai petugas (untuk dropdown list Tambah Petugas)
+    // Warga yang belum didaftarkan dalam pengurus
     const availableWarga = wargaList.filter(
-        warga => warga.is_active && !petugasList.some(p => p.user_id === warga.id)
+        warga => warga.is_active && !strukturList.some(s => s.user_id === warga.id)
     );
 
     // Filter available warga berdasarkan search inside dropdown
@@ -119,9 +135,14 @@ const Petugas = () => {
 
     // Open Modal Handlers
     const openAddModal = () => {
+        const firstWargaId = availableWarga.length > 0 ? availableWarga[0].id : '';
+        const firstRoleId = roleList.length > 0 ? roleList[0].id : '';
+        const firstRtId = rtList.length > 0 ? rtList[0].id : '';
+
         setFormData({
-            user_id: availableWarga.length > 0 ? availableWarga[0].id : '',
-            jabatan: '',
+            user_id: firstWargaId,
+            role_id: firstRoleId,
+            rt_id: firstRtId,
             is_active: 1
         });
         setFormError('');
@@ -130,41 +151,43 @@ const Petugas = () => {
         setIsAddOpen(true);
     };
 
-    const openEditModal = (p) => {
-        setSelectedPetugas(p);
+    const openEditModal = (s) => {
+        setSelectedPengurus(s);
         setFormData({
-            user_id: p.user_id,
-            jabatan: p.jabatan,
-            is_active: p.is_active ? 1 : 0
+            user_id: s.user_id,
+            role_id: s.role_id,
+            rt_id: s.rt_id || '',
+            is_active: s.is_active ? 1 : 0
         });
         setFormError('');
         setIsEditOpen(true);
     };
 
-    const openViewModal = (p) => {
-        setSelectedPetugas(p);
+    const openViewModal = (s) => {
+        setSelectedPengurus(s);
         setIsViewOpen(true);
     };
 
-    const openDeleteModal = (p) => {
-        setSelectedPetugas(p);
+    const openDeleteModal = (s) => {
+        setSelectedPengurus(s);
         setIsDeleteOpen(true);
     };
 
     // Action Submit Handlers
     const handleAddSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.user_id || !formData.jabatan) {
-            setFormError('Nama Warga dan Jabatan wajib diisi');
+        if (!formData.user_id || !formData.role_id) {
+            setFormError('Warga dan Jabatan (Role) wajib dipilih');
             return;
         }
 
         try {
             setSubmitLoading(true);
             setFormError('');
-            const res = await api.post('/petugas', {
+            const res = await api.post('/struktur', {
                 user_id: formData.user_id,
-                jabatan: formData.jabatan,
+                role_id: formData.role_id,
+                rt_id: formData.rt_id || null,
                 is_active: formData.is_active === 1
             });
             if (res.data && res.data.status === 'success') {
@@ -172,7 +195,7 @@ const Petugas = () => {
                 fetchData();
             }
         } catch (err) {
-            setFormError(err.response?.data?.message || 'Gagal menambahkan petugas');
+            setFormError(err.response?.data?.message || 'Gagal menambahkan pengurus');
         } finally {
             setSubmitLoading(false);
         }
@@ -180,16 +203,17 @@ const Petugas = () => {
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.jabatan) {
-            setFormError('Jabatan petugas wajib diisi');
+        if (!formData.role_id) {
+            setFormError('Jabatan (Role) wajib dipilih');
             return;
         }
 
         try {
             setSubmitLoading(true);
             setFormError('');
-            const res = await api.put(`/petugas/${selectedPetugas.id}`, {
-                jabatan: formData.jabatan,
+            const res = await api.put(`/struktur/${selectedPengurus.id}`, {
+                role_id: formData.role_id,
+                rt_id: formData.rt_id || null,
                 is_active: formData.is_active === 1
             });
             if (res.data && res.data.status === 'success') {
@@ -197,7 +221,7 @@ const Petugas = () => {
                 fetchData();
             }
         } catch (err) {
-            setFormError(err.response?.data?.message || 'Gagal memperbarui data petugas');
+            setFormError(err.response?.data?.message || 'Gagal memperbarui data pengurus');
         } finally {
             setSubmitLoading(false);
         }
@@ -206,14 +230,14 @@ const Petugas = () => {
     const handleDeleteSubmit = async () => {
         try {
             setSubmitLoading(true);
-            const res = await api.delete(`/petugas/${selectedPetugas.id}`);
+            const res = await api.delete(`/struktur/${selectedPengurus.id}`);
             if (res.data && res.data.status === 'success') {
                 setIsDeleteOpen(false);
                 fetchData();
             }
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Gagal menghapus petugas');
+            alert(err.response?.data?.message || 'Gagal menghapus pengurus');
         } finally {
             setSubmitLoading(false);
         }
@@ -228,10 +252,10 @@ const Petugas = () => {
                 <div>
                     <h1 className="text-2xl font-bold text-emerald-950 tracking-tight flex items-center gap-2">
                         <Contact className="text-emerald-600" />
-                        Master Data Petugas
+                        Struktur Organisasi
                     </h1>
                     <p className="text-sm text-emerald-600/80 mt-1">
-                        Kelola data warga yang ditunjuk sebagai petugas pelayanan di lingkungan Wargatify.
+                        Kelola data warga yang ditunjuk dalam struktur kepengurusan pelayanan wilayah RT-RW.
                     </p>
                 </div>
                 {isAuthorized && (
@@ -241,7 +265,7 @@ const Petugas = () => {
                         className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold text-sm rounded-xl shadow-sm transition-all cursor-pointer"
                     >
                         <Plus size={18} />
-                        <span>Tambah Petugas</span>
+                        <span>Tambah Pengurus</span>
                     </button>
                 )}
             </div>
@@ -253,8 +277,8 @@ const Petugas = () => {
                         <Contact size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Petugas</p>
-                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">{petugasList.length} Orang</p>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Pengurus</p>
+                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">{strukturList.length} Orang</p>
                     </div>
                 </div>
 
@@ -263,9 +287,9 @@ const Petugas = () => {
                         <UserCheck size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Petugas Aktif</p>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Pengurus Aktif</p>
                         <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                            {petugasList.filter(p => p.is_active).length} Orang
+                            {strukturList.filter(s => s.is_active).length} Orang
                         </p>
                     </div>
                 </div>
@@ -275,7 +299,7 @@ const Petugas = () => {
                         <Briefcase size={24} />
                     </div>
                     <div>
-                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Warga Belum Ditunjuk</p>
+                        <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Warga Belum Masuk Struktur</p>
                         <p className="text-2xl font-bold text-emerald-950 mt-0.5">
                             {availableWarga.length} Warga
                         </p>
@@ -294,7 +318,7 @@ const Petugas = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="block w-full pl-10 pr-3 py-2 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
-                        placeholder="Cari nama, no hp, jabatan..."
+                        placeholder="Cari nama, jabatan, atau RT..."
                     />
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -312,7 +336,7 @@ const Petugas = () => {
                 {loading ? (
                     <div className="py-20 flex flex-col items-center justify-center text-emerald-600">
                         <Loader2 className="animate-spin mb-2" size={32} />
-                        <p className="text-sm font-medium">Memuat data petugas...</p>
+                        <p className="text-sm font-medium">Memuat data pengurus...</p>
                     </div>
                 ) : error ? (
                     <div className="py-16 flex flex-col items-center justify-center text-red-500 px-4 text-center">
@@ -325,20 +349,20 @@ const Petugas = () => {
                             Coba Lagi
                         </button>
                     </div>
-                ) : filteredPetugas.length === 0 ? (
+                ) : filteredStruktur.length === 0 ? (
                     <div className="py-16 text-center text-emerald-600/60">
                         <AlertCircle className="mx-auto mb-2" size={32} />
-                        <p className="font-medium">Data petugas tidak ditemukan</p>
+                        <p className="font-medium">Data pengurus tidak ditemukan</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-emerald-50">
                             <thead className="bg-emerald-50/30">
                                 <tr>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Nama Petugas</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Nama Pengurus</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">No. HP</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Wilayah RT/RW</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Jabatan</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">RT Penugasan</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Jabatan (Role)</th>
                                     <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-emerald-800 uppercase tracking-wider">Status</th>
                                     <th scope="col" className="relative px-6 py-4">
                                         <span className="sr-only">Actions</span>
@@ -346,41 +370,41 @@ const Petugas = () => {
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-emerald-50/50">
-                                {filteredPetugas.map((p) => (
-                                    <tr key={p.id} className="hover:bg-emerald-50/10 transition-colors">
+                                {filteredStruktur.map((s) => (
+                                    <tr key={s.id} className="hover:bg-emerald-50/10 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 font-bold flex items-center justify-center">
-                                                    {p.nama_lengkap.charAt(0).toUpperCase()}
+                                                    {s.nama_lengkap.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div className="ml-3">
-                                                    <div className="text-sm font-semibold text-emerald-950">{p.nama_lengkap}</div>
-                                                    <div className="text-xs text-emerald-600/70">Blok {p.blok_rumah || '-'}/{p.nomor_rumah || '-'}</div>
+                                                    <div className="text-sm font-semibold text-emerald-950">{s.nama_lengkap}</div>
+                                                    <div className="text-xs text-emerald-600/70">Blok {s.blok_rumah || '-'}/{s.nomor_rumah || '-'}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-emerald-900 font-medium">
-                                            {p.no_hp}
+                                            {s.no_hp}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-emerald-900 font-medium">
-                                            {p.nomor_rt ? `RT ${p.nomor_rt} / RW ${p.nomor_rw}` : '-'}
+                                            {s.nomor_rt ? `RT ${s.nomor_rt} / RW ${s.nomor_rw}` : 'Seluruh Wilayah'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-emerald-950 font-bold">
-                                            {p.jabatan}
+                                            {s.jabatan}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                                p.is_active 
+                                                s.is_active 
                                                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
                                                     : 'bg-red-50 text-red-600 border border-red-200'
                                             }`}>
-                                                {p.is_active ? 'Aktif' : 'Non-aktif'}
+                                                {s.is_active ? 'Aktif' : 'Non-aktif'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end gap-2">
                                                 <button 
-                                                    onClick={() => openViewModal(p)}
+                                                    onClick={() => openViewModal(s)}
                                                     className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
                                                     title="View Detail"
                                                 >
@@ -389,16 +413,16 @@ const Petugas = () => {
                                                 {isAuthorized && (
                                                     <>
                                                         <button 
-                                                            onClick={() => openEditModal(p)}
+                                                            onClick={() => openEditModal(s)}
                                                             className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
-                                                            title="Edit Petugas"
+                                                            title="Edit Pengurus"
                                                         >
                                                             <Edit2 size={16} />
                                                         </button>
                                                         <button 
-                                                            onClick={() => openDeleteModal(p)}
+                                                            onClick={() => openDeleteModal(s)}
                                                             className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                                                            title="Hapus Petugas"
+                                                            title="Hapus Pengurus"
                                                         >
                                                             <Trash2 size={16} />
                                                         </button>
@@ -414,7 +438,7 @@ const Petugas = () => {
                 )}
             </div>
 
-            {/* MODAL: TAMBAH PETUGAS */}
+            {/* MODAL: TAMBAH PENGURUS */}
             {isAddOpen && (
                 <div className="fixed inset-0 bg-emerald-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl border border-emerald-50 max-w-md w-full overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[90vh]">
@@ -422,7 +446,7 @@ const Petugas = () => {
                         <div className="px-6 py-4 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
                             <h3 className="text-lg font-bold text-emerald-950 flex items-center gap-2">
                                 <Plus className="text-emerald-600" size={20} />
-                                Tambah Petugas Baru
+                                Tambah Pengurus Baru
                             </h3>
                             <button onClick={() => setIsAddOpen(false)} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
                                 <X size={20} />
@@ -437,7 +461,8 @@ const Petugas = () => {
                                 </div>
                             )}
 
-                             <div>
+                            {/* Pilih Warga Custom Dropdown */}
+                            <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Pilih Warga *</label>
                                 <div className="relative">
                                     <button
@@ -461,12 +486,8 @@ const Petugas = () => {
 
                                     {isDropdownOpen && (
                                         <>
-                                            {/* Click overlay to close dropdown */}
                                             <div className="fixed inset-0 z-10" onClick={() => { setIsDropdownOpen(false); setWargaSearchTerm(''); }}></div>
-                                            
-                                            {/* Dropdown list container */}
                                             <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
-                                                {/* Search input in dropdown */}
                                                 <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
                                                     <div className="relative">
                                                         <input
@@ -480,7 +501,6 @@ const Petugas = () => {
                                                     </div>
                                                 </div>
 
-                                                {/* Options List */}
                                                 <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
                                                     {filteredAvailableWarga.length === 0 ? (
                                                         <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
@@ -515,19 +535,47 @@ const Petugas = () => {
                                 </div>
                             </div>
 
+                            {/* Pilih Jabatan (Role DDL) */}
                             <div>
-                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Jabatan / Posisi Tugas *</label>
-                                <input
-                                    type="text"
-                                    name="jabatan"
-                                    value={formData.jabatan}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
-                                    placeholder="Contoh: Koordinator K3 / Keamanan"
-                                    required
-                                />
+                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Jabatan (Role) *</label>
+                                <div className="relative">
+                                    <select
+                                        name="role_id"
+                                        value={formData.role_id}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
+                                        required
+                                    >
+                                        {roleList.map((r) => (
+                                            <option key={r.id} value={r.id}>
+                                                {r.nama_role}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
+                            {/* Pilih RT Penugasan */}
+                            <div>
+                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">RT Penugasan</label>
+                                <div className="relative">
+                                    <select
+                                        name="rt_id"
+                                        value={formData.rt_id}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
+                                    >
+                                        <option value="">-- Seluruh Wilayah (Lokal/RW) --</option>
+                                        {rtList.map((rt) => (
+                                            <option key={rt.id} value={rt.id}>
+                                                RT {rt.nomor_rt} / RW {rt.nomor_rw}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Status Keaktifan */}
                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Status Keaktifan</label>
                                 <div className="flex gap-4 mt-1">
@@ -578,7 +626,7 @@ const Petugas = () => {
                                     ) : (
                                         <>
                                             <Save size={16} />
-                                            <span>Simpan Petugas</span>
+                                            <span>Simpan Pengurus</span>
                                         </>
                                     )}
                                 </button>
@@ -588,15 +636,15 @@ const Petugas = () => {
                 </div>
             )}
 
-            {/* MODAL: EDIT PETUGAS */}
-            {isEditOpen && selectedPetugas && (
+            {/* MODAL: EDIT PENGURUS */}
+            {isEditOpen && selectedPengurus && (
                 <div className="fixed inset-0 bg-emerald-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl border border-emerald-50 max-w-md w-full overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[90vh]">
                         {/* Header */}
                         <div className="px-6 py-4 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
                             <h3 className="text-lg font-bold text-emerald-950 flex items-center gap-2">
                                 <Edit2 className="text-emerald-600" size={20} />
-                                Edit Data Petugas
+                                Edit Data Pengurus
                             </h3>
                             <button onClick={() => setIsEditOpen(false)} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
                                 <X size={20} />
@@ -615,25 +663,53 @@ const Petugas = () => {
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nama Warga (Read-only)</label>
                                 <input
                                     type="text"
-                                    value={`${selectedPetugas.nama_lengkap} (HP: ${selectedPetugas.no_hp})`}
+                                    value={`${selectedPengurus.nama_lengkap} (HP: ${selectedPengurus.no_hp})`}
                                     className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm bg-gray-50 text-gray-500 font-medium"
                                     disabled
                                 />
                             </div>
 
+                            {/* Pilih Jabatan (Role DDL) */}
                             <div>
-                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Jabatan / Posisi Tugas *</label>
-                                <input
-                                    type="text"
-                                    name="jabatan"
-                                    value={formData.jabatan}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
-                                    placeholder="Masukkan jabatan petugas"
-                                    required
-                                />
+                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Jabatan (Role) *</label>
+                                <div className="relative">
+                                    <select
+                                        name="role_id"
+                                        value={formData.role_id}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
+                                        required
+                                    >
+                                        {roleList.map((r) => (
+                                            <option key={r.id} value={r.id}>
+                                                {r.nama_role}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
 
+                            {/* Pilih RT Penugasan */}
+                            <div>
+                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">RT Penugasan</label>
+                                <div className="relative">
+                                    <select
+                                        name="rt_id"
+                                        value={formData.rt_id}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
+                                    >
+                                        <option value="">-- Seluruh Wilayah (Lokal/RW) --</option>
+                                        {rtList.map((rt) => (
+                                            <option key={rt.id} value={rt.id}>
+                                                RT {rt.nomor_rt} / RW {rt.nomor_rw}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Status Keaktifan */}
                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Status Keaktifan</label>
                                 <div className="flex gap-4 mt-1">
@@ -695,14 +771,14 @@ const Petugas = () => {
             )}
 
             {/* MODAL: VIEW DETAILS */}
-            {isViewOpen && selectedPetugas && (
+            {isViewOpen && selectedPengurus && (
                 <div className="fixed inset-0 bg-emerald-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl border border-emerald-50 max-w-sm w-full overflow-hidden shadow-2xl animate-fade-in flex flex-col">
                         {/* Header */}
                         <div className="px-6 py-4 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
                             <h3 className="text-lg font-bold text-emerald-950 flex items-center gap-2">
                                 <Info className="text-emerald-600" size={20} />
-                                Detail Profil Petugas
+                                Detail Profil Pengurus
                             </h3>
                             <button onClick={() => setIsViewOpen(false)} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
                                 <X size={20} />
@@ -716,8 +792,8 @@ const Petugas = () => {
                                     <Contact size={32} />
                                 </div>
                                 <div>
-                                    <h4 className="text-lg font-bold text-emerald-950 leading-tight">{selectedPetugas.nama_lengkap}</h4>
-                                    <p className="text-sm text-emerald-600 mt-1">{selectedPetugas.jabatan}</p>
+                                    <h4 className="text-lg font-bold text-emerald-950 leading-tight">{selectedPengurus.nama_lengkap}</h4>
+                                    <p className="text-sm text-emerald-600 mt-1">{selectedPengurus.jabatan}</p>
                                 </div>
                             </div>
 
@@ -725,29 +801,29 @@ const Petugas = () => {
                             <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
                                 <div>
                                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">No. HP</p>
-                                    <p className="font-semibold text-emerald-950 mt-0.5">{selectedPetugas.no_hp}</p>
+                                    <p className="font-semibold text-emerald-950 mt-0.5">{selectedPengurus.no_hp}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Alamat Rumah</p>
                                     <p className="font-semibold text-emerald-950 mt-0.5">
-                                        Blok {selectedPetugas.blok_rumah || '-'}/{selectedPetugas.nomor_rumah || '-'}
+                                        Blok {selectedPengurus.blok_rumah || '-'}/{selectedPengurus.nomor_rumah || '-'}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Wilayah RT/RW</p>
+                                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">RT Penugasan</p>
                                     <p className="font-semibold text-emerald-950 mt-0.5">
-                                        {selectedPetugas.nomor_rt ? `RT ${selectedPetugas.nomor_rt} / RW ${selectedPetugas.nomor_rw}` : '-'}
+                                        {selectedPengurus.nomor_rt ? `RT ${selectedPengurus.nomor_rt} / RW ${selectedPengurus.nomor_rw}` : 'Seluruh Wilayah'}
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Status Keaktifan</p>
                                     <p className="font-semibold text-emerald-950 mt-0.5">
-                                        {selectedPetugas.is_active ? 'Aktif Tugas' : 'Non-aktif'}
+                                        {selectedPengurus.is_active ? 'Aktif Kepengurusan' : 'Non-aktif'}
                                     </p>
                                 </div>
                                 <div className="col-span-2">
-                                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">ID Petugas</p>
-                                    <p className="font-semibold text-emerald-950 mt-0.5 font-mono text-[10px] break-all">{selectedPetugas.id}</p>
+                                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">ID Pengurus</p>
+                                    <p className="font-semibold text-emerald-950 mt-0.5 font-mono text-[10px] break-all">{selectedPengurus.id}</p>
                                 </div>
                             </div>
 
@@ -766,7 +842,7 @@ const Petugas = () => {
             )}
 
             {/* MODAL: HAPUS CONFIRMATION */}
-            {isDeleteOpen && selectedPetugas && (
+            {isDeleteOpen && selectedPengurus && (
                 <div className="fixed inset-0 bg-emerald-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-white rounded-2xl border border-emerald-50 max-w-sm w-full overflow-hidden shadow-2xl animate-fade-in flex flex-col">
                         <div className="p-6 text-center space-y-4">
@@ -774,9 +850,9 @@ const Petugas = () => {
                                 <AlertTriangle size={24} />
                             </div>
                             <div>
-                                <h4 className="text-lg font-bold text-emerald-950">Konfirmasi Hapus Petugas</h4>
+                                <h4 className="text-lg font-bold text-emerald-950">Konfirmasi Hapus Pengurus</h4>
                                 <p className="text-sm text-emerald-600/70 mt-2">
-                                    Apakah Anda yakin ingin memberhentikan <strong>{selectedPetugas.nama_lengkap}</strong> sebagai petugas? Tindakan ini hanya menghapus status ketugasan tanpa menghapus data warga aslinya.
+                                    Apakah Anda yakin ingin memberhentikan <strong>{selectedPengurus.nama_lengkap}</strong> dari struktur organisasi? Tindakan ini hanya menghapus status kepengurusan tanpa menghapus data warga asli.
                                 </p>
                             </div>
                             <div className="flex items-center gap-3 pt-2">
@@ -806,4 +882,4 @@ const Petugas = () => {
     );
 };
 
-export default Petugas;
+export default StrukturOrganisasi;

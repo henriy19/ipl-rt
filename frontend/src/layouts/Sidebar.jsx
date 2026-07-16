@@ -15,7 +15,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Master Role', path: '/role', icon: <Shield size={20} /> },
     { name: 'Master Iuran', path: '/iuran', icon: <CreditCard size={20} /> },
     { name: 'Master RT-RW', path: '/rt-rw', icon: <Map size={20} /> },
-    { name: 'Master Petugas', path: '/petugas', icon: <Contact size={20} /> },
+    { name: 'Master Struktur', path: '/struktur', icon: <Contact size={20} /> },
   ];
 
   return (

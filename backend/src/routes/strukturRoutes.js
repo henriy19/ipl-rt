@@ -1,11 +1,11 @@
 const express = require('express');
 const { 
-    GetAllPetugas, 
-    GetPetugasById, 
-    CreatePetugas, 
-    UpdatePetugas, 
-    DeletePetugas 
-} = require('../controllers/petugasController');
+    GetAllStruktur, 
+    GetStrukturById, 
+    CreateStruktur, 
+    UpdateStruktur, 
+    DeleteStruktur 
+} = require('../controllers/strukturController');
 const { protect } = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -23,14 +23,14 @@ const authorizeRoles = (...allowedRoles) => {
     };
 };
 
-// Rute manajemen Petugas
+// Rute manajemen Struktur Organisasi
 router.route('/')
-    .get(GetAllPetugas)
-    .post(authorizeRoles('Admin', 'Petugas', 'Bendahara'), CreatePetugas);
+    .get(GetAllStruktur)
+    .post(authorizeRoles('Admin', 'Petugas', 'Bendahara'), CreateStruktur);
 
 router.route('/:id')
-    .get(GetPetugasById)
-    .put(authorizeRoles('Admin', 'Petugas', 'Bendahara'), UpdatePetugas)
-    .delete(authorizeRoles('Admin', 'Petugas', 'Bendahara'), DeletePetugas);
+    .get(GetStrukturById)
+    .put(authorizeRoles('Admin', 'Petugas', 'Bendahara'), UpdateStruktur)
+    .delete(authorizeRoles('Admin', 'Petugas', 'Bendahara'), DeleteStruktur);
 
 module.exports = router;
