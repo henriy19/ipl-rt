@@ -68,21 +68,21 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/rt-rw` dengan layout terproteksi.
 - **`frontend/src/features/master/RtRw.jsx` [NEW]**: Halaman manajemen RT-RW berformat tabbed layout (Tab RT & Tab RW) lengkap dengan metrik statistik, filter pencarian, dan modal interaktif CRUD.
 
-### 8. Fitur CRUD & Manajemen Petugas (Baru)
-- **`backend/src/models/petugasModel.js` [NEW]**: Query PostgreSQL aman untuk CRUD tabel `master_petugas` dengan join ke `users` untuk mengambil nama dan nomor handphone.
-- **`backend/src/controllers/petugasController.js` [NEW]**: Logic API Petugas, validasi penunjukan warga dari dropdownlist, dan pencegahan duplikasi pendaftaran satu warga menjadi petugas ganda.
-- **`backend/src/routes/petugasRoutes.js` [NEW]**: Endpoint `/api/petugas` terproteksi JWT & hak akses pengurus (RBAC).
-- **`backend/src/app.js` [MODIFY]**: Registrasi router `/api/petugas`.
-- **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Penambahan menu "Master Petugas" (Contact icon) pada kelompok Data Master.
-- **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/petugas`.
-- **`frontend/src/features/master/Petugas.jsx` [NEW]**: Halaman manajemen Petugas berisi visualisasi tabel, metrik ringkasan (Petugas Aktif/Non-aktif), dan modal CRUD dengan dropdown input bersumber dari data warga (`users`).
+### 8. Fitur CRUD & Manajemen Struktur Organisasi (Baru)
+- **`backend/src/models/strukturModel.js` [NEW]**: Query PostgreSQL aman untuk CRUD tabel `master_struktur` dengan join ke `users` (profil warga), `roles` (jabatan/peran), dan `master_rt`/`master_rw`.
+- **`backend/src/controllers/strukturController.js` [NEW]**: Logic API Struktur Organisasi, validasi penunjukan warga dari dropdownlist, validasi jabatan berdasarkan role_id, penentuan RT penugasan (rt_id), dan pencegahan duplikasi pendaftaran satu warga menjadi pengurus ganda.
+- **`backend/src/routes/strukturRoutes.js` [NEW]**: Endpoint `/api/struktur` terproteksi JWT & hak akses pengurus (RBAC).
+- **`backend/src/app.js` [MODIFY]**: Registrasi router `/api/struktur`.
+- **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Penambahan menu "Master Struktur" (Contact icon) pada kelompok Data Master.
+- **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/struktur`.
+- **`frontend/src/features/master/StrukturOrganisasi.jsx` [NEW]**: Halaman manajemen Struktur Organisasi berisi visualisasi tabel kepengurusan, metrik ringkasan pengurus aktif, dan modal CRUD dengan dropdown input dinamis bersumber dari data warga, data role (jabatan), dan data RT-RW.
 
 ---
 
 ## Verification Plan
 
 1. **Dropdown Reference Fetching Verification**:
-   - Memastikan dropdown RT/RW dan Roles di Form Tambah/Edit memuat data yang benar secara dinamis.
+   - Memastikan dropdown RT/RW and Roles di Form Tambah/Edit memuat data yang benar secara dinamis.
 2. **Form Validation & POST/PUT Testing**:
    - Memastikan input data warga divalidasi dengan baik (Nama & HP wajib diisi).
    - Memastikan data warga baru terdaftar dengan benar di database setelah submit.
@@ -99,9 +99,9 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
    - Memverifikasi pencegahan duplikasi nomor RT pada RW yang sama.
    - Memverifikasi integrasi validasi relasi asing: Penolakan hapus RW jika masih memiliki RT, dan penolakan hapus RT jika masih memiliki warga.
    - Memverifikasi bahwa data RT/RW yang baru dibuat langsung tersinkronisasi di dropdown pendaftaran Data Warga.
-6. **Petugas CRUD Management Verification**:
-   - Memverifikasi pembacaan dropdown warga aktif saat menambah petugas baru.
-   - Memverifikasi penyimpanan data petugas (UUID, user_id, jabatan, status) ke database PostgreSQL.
-   - Memverifikasi pencegahan penunjukan satu warga sebagai petugas lebih dari satu kali (unik check).
-   - Memverifikasi aksi ubah jabatan/status keaktifan petugas, dan penghapusan petugas terintegrasi.
+6. **Struktur Organisasi CRUD Verification**:
+   - Memverifikasi pemuatan dropdown warga aktif, dropdown peran/jabatan (role), dan dropdown RT penugasan secara dinamis saat tambah pengurus baru.
+   - Memverifikasi penyimpanan data struktur organisasi (UUID, user_id, role_id, rt_id, status) ke database PostgreSQL.
+   - Memverifikasi pencegahan penunjukan satu warga sebagai pengurus lebih dari satu kali.
+   - Memverifikasi aksi ubah jabatan (role), RT penugasan, dan status keaktifan pengurus.
    - Memastikan pembatasan RBAC agar hanya peran pengurus yang dapat memodifikasi data.
