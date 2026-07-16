@@ -30,6 +30,10 @@ const Petugas = () => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Custom Dropdown States for Pilih Warga
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [wargaSearchTerm, setWargaSearchTerm] = useState('');
+
     // Modal Control States
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -87,6 +91,23 @@ const Petugas = () => {
         warga => warga.is_active && !petugasList.some(p => p.user_id === warga.id)
     );
 
+    // Filter available warga berdasarkan search inside dropdown
+    const filteredAvailableWarga = availableWarga.filter(w => {
+        const q = wargaSearchTerm.toLowerCase();
+        return (
+            w.nama_lengkap.toLowerCase().includes(q) || 
+            (w.blok_rumah && w.blok_rumah.toLowerCase().includes(q)) ||
+            (w.no_hp && w.no_hp.includes(q))
+        );
+    });
+
+    // Handler untuk memilih warga dari dropdown kustom
+    const handleSelectWarga = (wargaId) => {
+        setFormData(prev => ({ ...prev, user_id: wargaId }));
+        setIsDropdownOpen(false);
+        setWargaSearchTerm('');
+    };
+
     // Form Change Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -104,6 +125,8 @@ const Petugas = () => {
             is_active: 1
         });
         setFormError('');
+        setIsDropdownOpen(false);
+        setWargaSearchTerm('');
         setIsAddOpen(true);
     };
 
@@ -195,6 +218,8 @@ const Petugas = () => {
             setSubmitLoading(false);
         }
     };
+
+    const selectedWargaObj = availableWarga.find(w => w.id === formData.user_id);
 
     return (
         <div className="space-y-6">
@@ -412,25 +437,82 @@ const Petugas = () => {
                                 </div>
                             )}
 
-                            <div>
+                             <div>
                                 <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Pilih Warga *</label>
-                                <select
-                                    name="user_id"
-                                    value={formData.user_id}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
-                                    required
-                                >
-                                    {availableWarga.length === 0 ? (
-                                        <option value="" disabled>Tidak ada warga yang tersedia</option>
-                                    ) : (
-                                        availableWarga.map((w) => (
-                                            <option key={w.id} value={w.id}>
-                                                {w.nama_lengkap} (Blok {w.blok_rumah || '-'}/{w.nomor_rumah || '-'}, HP: {w.no_hp})
-                                            </option>
-                                        ))
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                        className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
+                                    >
+                                        {selectedWargaObj ? (
+                                            <span className="block truncate font-medium">
+                                                {selectedWargaObj.nama_lengkap} <span className="text-[10px] text-emerald-600/70 font-semibold">(Blok {selectedWargaObj.blok_rumah || '-'}/{selectedWargaObj.nomor_rumah || '-'}, HP: {selectedWargaObj.no_hp})</span>
+                                            </span>
+                                        ) : (
+                                            <span className="text-gray-400">Pilih Warga...</span>
+                                        )}
+                                        <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                            </svg>
+                                        </span>
+                                    </button>
+
+                                    {isDropdownOpen && (
+                                        <>
+                                            {/* Click overlay to close dropdown */}
+                                            <div className="fixed inset-0 z-10" onClick={() => { setIsDropdownOpen(false); setWargaSearchTerm(''); }}></div>
+                                            
+                                            {/* Dropdown list container */}
+                                            <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                {/* Search input in dropdown */}
+                                                <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                    <div className="relative">
+                                                        <input
+                                                            type="text"
+                                                            value={wargaSearchTerm}
+                                                            onChange={(e) => setWargaSearchTerm(e.target.value)}
+                                                            placeholder="Cari nama, blok atau HP..."
+                                                            className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                        />
+                                                        <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                    </div>
+                                                </div>
+
+                                                {/* Options List */}
+                                                <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                    {filteredAvailableWarga.length === 0 ? (
+                                                        <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
+                                                            Tidak ada warga yang cocok
+                                                        </div>
+                                                    ) : (
+                                                        filteredAvailableWarga.map((w) => {
+                                                            const isSelected = w.id === formData.user_id;
+                                                            return (
+                                                                <div
+                                                                    key={w.id}
+                                                                    onClick={() => handleSelectWarga(w.id)}
+                                                                    className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                        isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                    }`}
+                                                                >
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <div className="font-semibold text-emerald-950 truncate">{w.nama_lengkap}</div>
+                                                                        <div className="text-[10px] text-emerald-600/60 mt-0.5">
+                                                                            Blok {w.blok_rumah || '-'}/{w.nomor_rumah || '-'} • HP: {w.no_hp}
+                                                                        </div>
+                                                                    </div>
+                                                                    {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
                                     )}
-                                </select>
+                                </div>
                             </div>
 
                             <div>

@@ -112,7 +112,7 @@ Verifikasi visual dan relasi data telah diuji menggunakan browser agent otomatis
 
 #### Rekaman Demo & Hasil Pengujian Fitur Petugas
 - Rekaman Demo Petugas CRUD Flow:
-  ![verify_petugas_crud_flow](file:///C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_petugas_crud_flow_1784206587379.webp)
+  ![verify_petugas_crud_flow](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_custom_select_flow_1784197166686.webp)
 
 ---
 
