@@ -114,6 +114,19 @@ Verifikasi visual dan relasi data telah diuji menggunakan browser agent otomatis
 - Rekaman Demo Struktur Organisasi CRUD Flow:
   ![verify_struktur_crud_flow](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_all_custom_dropdowns_flow_1784199102790.webp)
 
+### E. Penyesuaian Global Seluruh Dropdown List ke Model Kustom Search Dropdown
+Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah bermigrasi ke model dropdown kustom premium dengan kolom pencarian real-time dan ber-border radius 2xl:
+1. **Data Warga**: Dropdown pilihan RT/RW dan Peran (Role) di form Tambah/Edit Warga.
+2. **Master RT-RW**: Dropdown pilihan RW Penaung di form Tambah/Edit RT.
+3. **Informasi Kegiatan**: Dropdown pilihan Kategori Kegiatan di form Tambah/Edit Kegiatan.
+4. **Transaksi Iuran**: Dropdown pilihan Metode Pembayaran di form Pembayaran/Verifikasi Iuran.
+
+#### Rekaman Demo Penyesuaian Dropdown Global
+- Demo Verifikasi Refactor Dropdown Global:
+  ![verify_all_custom_selects_refactor](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_all_custom_selects_refactor_1784199795978.webp)
+- Demo Verifikasi Kategori Dropdown Fix (Sukses Tanpa Crash):
+  ![verify_informasi_kategori_dropdown_fix](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_informasi_kategori_dropdown_fix_1784200198202.webp)
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi

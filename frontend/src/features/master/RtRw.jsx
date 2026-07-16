@@ -57,6 +57,10 @@ const RtRw = () => {
         is_active: 1
     });
 
+    // Custom Dropdown States for RW selection in RT form
+    const [isRwDropdownOpen, setIsRwDropdownOpen] = useState(false);
+    const [rwSearchTerm, setRwSearchTerm] = useState('');
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -112,6 +116,17 @@ const RtRw = () => {
         }));
     };
 
+    const filteredRws = rwList.filter(rw => {
+        const q = rwSearchTerm.toLowerCase();
+        return rw.nomor_rw.includes(q) || (rw.ketua_rw && rw.ketua_rw.toLowerCase().includes(q));
+    });
+
+    const handleSelectRw = (rwId) => {
+        setFormData(prev => ({ ...prev, rw_id: rwId }));
+        setIsRwDropdownOpen(false);
+        setRwSearchTerm('');
+    };
+
     // Open Modal Handlers
     const openAddModal = () => {
         setFormError('');
@@ -129,6 +144,8 @@ const RtRw = () => {
                 is_active: 1
             });
         }
+        setIsRwDropdownOpen(false);
+        setRwSearchTerm('');
         setIsAddOpen(true);
     };
 
@@ -149,6 +166,8 @@ const RtRw = () => {
                 is_active: item.is_active ? 1 : 0
             });
         }
+        setIsRwDropdownOpen(false);
+        setRwSearchTerm('');
         setIsEditOpen(true);
     };
 
@@ -279,6 +298,8 @@ const RtRw = () => {
             setSubmitLoading(false);
         }
     };
+
+    const selectedRwObj = rwList.find(rw => rw.id === formData.rw_id);
 
     return (
         <div className="space-y-6">
@@ -583,18 +604,68 @@ const RtRw = () => {
                                 <>
                                     <div>
                                         <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">RW Penaung *</label>
-                                        <select
-                                            name="rw_id"
-                                            value={formData.rw_id}
-                                            onChange={handleInputChange}
-                                            className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
-                                            required
-                                        >
-                                            <option value="" disabled>Pilih RW</option>
-                                            {rwList.filter(rw => rw.is_active).map(rw => (
-                                                <option key={rw.id} value={rw.id}>RW {rw.nomor_rw} (Ketua: {rw.ketua_rw || '-'})</option>
-                                            ))}
-                                        </select>
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsRwDropdownOpen(!isRwDropdownOpen)}
+                                                className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
+                                            >
+                                                {selectedRwObj ? (
+                                                    <span className="block truncate font-medium">RW {selectedRwObj.nomor_rw} (Ketua: {selectedRwObj.ketua_rw || '-'})</span>
+                                                ) : (
+                                                    <span className="text-gray-400">Pilih RW...</span>
+                                                )}
+                                                <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </span>
+                                            </button>
+
+                                            {isRwDropdownOpen && (
+                                                <>
+                                                    <div className="fixed inset-0 z-10" onClick={() => { setIsRwDropdownOpen(false); setRwSearchTerm(''); }}></div>
+                                                    <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                        <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    value={rwSearchTerm}
+                                                                    onChange={(e) => setRwSearchTerm(e.target.value)}
+                                                                    placeholder="Cari RW..."
+                                                                    className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                                />
+                                                                <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                            {filteredRws.filter(rw => rw.is_active).length === 0 ? (
+                                                                <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
+                                                                    Tidak ada RW aktif yang cocok
+                                                                </div>
+                                                            ) : (
+                                                                filteredRws.filter(rw => rw.is_active).map((rw) => {
+                                                                    const isSelected = rw.id === formData.rw_id;
+                                                                    return (
+                                                                        <div
+                                                                            key={rw.id}
+                                                                            onClick={() => handleSelectRw(rw.id)}
+                                                                            className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                                isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                            }`}
+                                                                        >
+                                                                            <span className="font-semibold text-emerald-950">RW {rw.nomor_rw} (Ketua: {rw.ketua_rw || '-'})</span>
+                                                                            {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nomor RT *</label>
@@ -732,18 +803,68 @@ const RtRw = () => {
                                 <>
                                     <div>
                                         <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">RW Penaung *</label>
-                                        <select
-                                            name="rw_id"
-                                            value={formData.rw_id}
-                                            onChange={handleInputChange}
-                                            className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 bg-white"
-                                            required
-                                        >
-                                            <option value="" disabled>Pilih RW</option>
-                                            {rwList.map(rw => (
-                                                <option key={rw.id} value={rw.id}>RW {rw.nomor_rw} {rw.is_active ? '' : '(Non-aktif)'}</option>
-                                            ))}
-                                        </select>
+                                        <div className="relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsRwDropdownOpen(!isRwDropdownOpen)}
+                                                className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
+                                            >
+                                                {selectedRwObj ? (
+                                                    <span className="block truncate font-medium">RW {selectedRwObj.nomor_rw} (Ketua: {selectedRwObj.ketua_rw || '-'})</span>
+                                                ) : (
+                                                    <span className="text-gray-400">Pilih RW...</span>
+                                                )}
+                                                <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                                    <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                        <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </span>
+                                            </button>
+
+                                            {isRwDropdownOpen && (
+                                                <>
+                                                    <div className="fixed inset-0 z-10" onClick={() => { setIsRwDropdownOpen(false); setRwSearchTerm(''); }}></div>
+                                                    <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                        <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    value={rwSearchTerm}
+                                                                    onChange={(e) => setRwSearchTerm(e.target.value)}
+                                                                    placeholder="Cari RW..."
+                                                                    className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                                />
+                                                                <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                            {filteredRws.length === 0 ? (
+                                                                <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
+                                                                    Tidak ada RW yang cocok
+                                                                </div>
+                                                            ) : (
+                                                                filteredRws.map((rw) => {
+                                                                    const isSelected = rw.id === formData.rw_id;
+                                                                    return (
+                                                                        <div
+                                                                            key={rw.id}
+                                                                            onClick={() => handleSelectRw(rw.id)}
+                                                                            className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                                isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                            }`}
+                                                                        >
+                                                                            <span className="font-semibold text-emerald-950">RW {rw.nomor_rw} (Ketua: {rw.ketua_rw || '-'}) {rw.is_active ? '' : '(Non-aktif)'}</span>
+                                                                            {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                     <div>
                                         <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nomor RT *</label>

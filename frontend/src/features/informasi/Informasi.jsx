@@ -19,7 +19,8 @@ import {
     AlertCircle,
     Play,
     Link,
-    Upload
+    Upload,
+    CheckCircle
 } from 'lucide-react';
 
 const Informasi = () => {
@@ -51,6 +52,10 @@ const Informasi = () => {
         video_url: ''
     });
 
+    // Custom Dropdown States for Kategori
+    const [isKategoriDropdownOpen, setIsKategoriDropdownOpen] = useState(false);
+    const [kategoriSearchTerm, setKategoriSearchTerm] = useState('');
+
     // Toggle Inputs for URL/Link vs Upload
     const [fotoInputType, setFotoInputType] = useState('link'); // 'link' or 'upload'
     const [videoInputType, setVideoInputType] = useState('link'); // 'link' or 'upload'
@@ -75,6 +80,25 @@ const Informasi = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const kategoriOptions = [
+        { value: 'Kegiatan', label: 'Kegiatan Umum' },
+        { value: 'Kerja Bakti', label: 'Kerja Bakti' },
+        { value: 'Rapat RT', label: 'Rapat RT' },
+        { value: 'Kesehatan', label: 'Kesehatan / Posyandu' },
+        { value: 'Sosialisasi', label: 'Sosialisasi' },
+        { value: 'Olahraga', label: 'Olahraga' }
+    ];
+
+    const filteredKategoriOptions = kategoriOptions.filter(opt =>
+        opt.label.toLowerCase().includes(kategoriSearchTerm.toLowerCase())
+    );
+
+    const handleSelectKategori = (val) => {
+        setFormData(prev => ({ ...prev, kategori: val }));
+        setIsKategoriDropdownOpen(false);
+        setKategoriSearchTerm('');
     };
 
     const handleInputChange = (e) => {
@@ -120,6 +144,8 @@ const Informasi = () => {
         setVideoInputType('link');
         setIsEditMode(false);
         setFormError('');
+        setIsKategoriDropdownOpen(false);
+        setKategoriSearchTerm('');
         setIsFormOpen(true);
     };
 
@@ -138,6 +164,8 @@ const Informasi = () => {
         setVideoInputType(info.video_url?.startsWith('/uploads') ? 'upload' : 'link');
         setIsEditMode(true);
         setFormError('');
+        setIsKategoriDropdownOpen(false);
+        setKategoriSearchTerm('');
         setIsFormOpen(true);
     };
 
@@ -261,6 +289,8 @@ const Informasi = () => {
             (info.kategori && info.kategori.toLowerCase().includes(query))
         );
     });
+
+    const selectedKategoriObj = kategoriOptions.find(opt => opt.value === formData.kategori);
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
@@ -467,20 +497,68 @@ const Informasi = () => {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Kategori *</label>
-                                    <select
-                                        name="kategori"
-                                        value={formData.kategori}
-                                        onChange={handleInputChange}
-                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 cursor-pointer"
-                                        required
-                                    >
-                                        <option value="Kegiatan">Kegiatan Umum</option>
-                                        <option value="Kerja Bakti">Kerja Bakti</option>
-                                        <option value="Rapat RT">Rapat RT</option>
-                                        <option value="Kesehatan">Kesehatan / Posyandu</option>
-                                        <option value="Sosialisasi">Sosialisasi</option>
-                                        <option value="Olahraga">Olahraga</option>
-                                    </select>
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsKategoriDropdownOpen(!isKategoriDropdownOpen)}
+                                            className="w-full flex items-center justify-between px-3 py-2 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left"
+                                        >
+                                            {selectedKategoriObj ? (
+                                                <span className="block truncate font-medium">{selectedKategoriObj.label}</span>
+                                            ) : (
+                                                <span className="text-gray-400">Pilih Kategori...</span>
+                                            )}
+                                            <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                    <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        </button>
+
+                                        {isKategoriDropdownOpen && (
+                                            <>
+                                                <div className="fixed inset-0 z-10" onClick={() => { setIsKategoriDropdownOpen(false); setKategoriSearchTerm(''); }}></div>
+                                                <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                    <div className="p-2 border-b border-emerald-50 bg-emerald-50/20">
+                                                        <div className="relative">
+                                                            <input
+                                                                type="text"
+                                                                value={kategoriSearchTerm}
+                                                                onChange={(e) => setKategoriSearchTerm(e.target.value)}
+                                                                placeholder="Cari kategori..."
+                                                                className="w-full px-3 py-1.5 pl-8 text-xs border border-emerald-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950 placeholder-emerald-300"
+                                                            />
+                                                            <Search className="absolute left-2.5 top-2.5 text-emerald-400" size={12} />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                        {filteredKategoriOptions.length === 0 ? (
+                                                            <div className="p-4 text-xs text-center text-emerald-600/60 font-medium">
+                                                                Tidak ada kategori yang cocok
+                                                            </div>
+                                                        ) : (
+                                                            filteredKategoriOptions.map((opt) => {
+                                                                const isSelected = opt.value === formData.kategori;
+                                                                return (
+                                                                    <div
+                                                                        key={opt.value}
+                                                                        onClick={() => handleSelectKategori(opt.value)}
+                                                                        className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                            isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                        }`}
+                                                                    >
+                                                                        <span className="font-semibold text-emerald-950">{opt.label}</span>
+                                                                        {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                                    </div>
+                                                                );
+                                                            })
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* FOTO KETENTUAN UPLOAD ATAU LINK */}

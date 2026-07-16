@@ -43,6 +43,9 @@ const Transaksi = () => {
         catatan_bendahara: ''
     });
 
+    // Custom Dropdown States for Metode Pembayaran
+    const [isMetodeDropdownOpen, setIsMetodeDropdownOpen] = useState(false);
+
     const [payMode, setPayMode] = useState('direct'); // 'direct', 'verify', 'submit'
     const [genLoading, setGenLoading] = useState(false);
     const [clearLoading, setClearLoading] = useState(false);
@@ -199,6 +202,11 @@ const Transaksi = () => {
     };
 
     // Open Modal Pembayaran
+    const handleSelectMetode = (val) => {
+        setPayForm(prev => ({ ...prev, metode_pembayaran: val }));
+        setIsMetodeDropdownOpen(false);
+    };
+
     const openPayModal = (tagihan, mode = 'direct') => {
         setSelectedTagihan(tagihan);
         setPayMode(mode);
@@ -207,6 +215,7 @@ const Transaksi = () => {
             catatan_bendahara: mode === 'verify' ? 'Pembayaran terverifikasi lunas oleh pengurus' : ''
         });
         setFormError('');
+        setIsMetodeDropdownOpen(false);
         setIsPayOpen(true);
     };
 
@@ -266,6 +275,12 @@ const Transaksi = () => {
         ];
         return daftarBulan[num - 1] || '';
     };
+
+    const metodeOptions = [
+        { value: 'cash', label: 'Tunai (Cash)' },
+        { value: 'transfer', label: 'Transfer Bank / E-Wallet' }
+    ];
+    const selectedMetodeObj = metodeOptions.find(opt => opt.value === payForm.metode_pembayaran);
 
     return (
         <div className="space-y-6">
@@ -613,16 +628,52 @@ const Transaksi = () => {
 
                             <div>
                                 <label className="block text-sm font-semibold text-emerald-950 mb-1.5">Metode Pembayaran</label>
-                                <select
-                                    name="metode_pembayaran"
-                                    value={payForm.metode_pembayaran}
-                                    onChange={(e) => setPayForm(prev => ({ ...prev, metode_pembayaran: e.target.value }))}
-                                    disabled={payMode === 'verify'}
-                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 text-emerald-900 transition-colors disabled:opacity-75 disabled:cursor-not-allowed"
-                                >
-                                    <option value="cash">Tunai (Cash)</option>
-                                    <option value="transfer">Transfer Bank / E-Wallet</option>
-                                </select>
+                                <div className="relative">
+                                    <button
+                                        type="button"
+                                        disabled={payMode === 'verify'}
+                                        onClick={() => setIsMetodeDropdownOpen(!isMetodeDropdownOpen)}
+                                        className="w-full flex items-center justify-between px-4 py-2.5 border border-emerald-100 rounded-xl text-sm text-emerald-950 bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all text-left disabled:opacity-75 disabled:cursor-not-allowed"
+                                    >
+                                        {selectedMetodeObj ? (
+                                            <span className="block truncate font-medium">{selectedMetodeObj.label}</span>
+                                        ) : (
+                                            <span className="text-gray-400">Pilih Metode...</span>
+                                        )}
+                                        {payMode !== 'verify' && (
+                                            <span className="ml-2 flex items-center pointer-events-none text-emerald-500">
+                                                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                                    <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                </svg>
+                                            </span>
+                                        )}
+                                    </button>
+
+                                    {isMetodeDropdownOpen && payMode !== 'verify' && (
+                                        <>
+                                            <div className="fixed inset-0 z-10" onClick={() => setIsMetodeDropdownOpen(false)}></div>
+                                            <div className="absolute z-20 mt-1.5 w-full bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in">
+                                                <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                    {metodeOptions.map((opt) => {
+                                                        const isSelected = opt.value === payForm.metode_pembayaran;
+                                                        return (
+                                                            <div
+                                                                key={opt.value}
+                                                                onClick={() => handleSelectMetode(opt.value)}
+                                                                className={`px-4 py-2.5 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                    isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                }`}
+                                                            >
+                                                                <span className="font-semibold text-emerald-950">{opt.label}</span>
+                                                                {isSelected && <CheckCircle size={14} className="text-emerald-600 ml-2 flex-shrink-0" />}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
                             <div>
