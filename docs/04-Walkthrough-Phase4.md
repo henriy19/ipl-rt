@@ -103,11 +103,22 @@ Verifikasi visual dan integrasi data telah diuji menggunakan browser agent otoma
 - Rekaman Demo RT-RW CRUD Flow:
   ![verify_rtrw_crud_flow](file:///C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_rtrw_crud_flow_1784105687379.webp)
 
+### D. Alur CRUD Master Petugas (Manajemen Penunjukan Petugas)
+Verifikasi visual dan relasi data telah diuji menggunakan browser agent otomatis untuk alur manajemen petugas:
+1. **Tambah Petugas**: Admin menavigasi ke menu "Master Petugas" -> klik "Tambah Petugas" -> memilih warga dari dropdown dinamis (yang berisi list data warga aktif) -> mengisi jabatan "Koordinator Keamanan" -> klik Simpan. Petugas tersimpan sukses di database.
+2. **Edit & View Petugas**: Mengubah jabatan petugas menjadi "Koordinator Keamanan RT 01", status aktif, lalu memverifikasi data ter-update secara instan pada tabel dan detail modal.
+3. **Duplikasi Check**: Mencoba mendaftarkan warga yang sama sebagai petugas kembali, sistem mendeteksi duplikasi dan menampilkan pesan penolakan dengan ramah.
+4. **Hapus Petugas**: Menghapus data petugas melalui modal konfirmasi, data petugas berhasil terhapus tanpa menghapus entitas warga asli di tabel `users`.
+
+#### Rekaman Demo & Hasil Pengujian Fitur Petugas
+- Rekaman Demo Petugas CRUD Flow:
+  ![verify_petugas_crud_flow](file:///C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_petugas_crud_flow_1784206587379.webp)
+
 ---
 
-## Cara Menjalankan Halaman Data Warga, Informasi, & RT-RW di Aplikasi
+## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Petugas di Aplikasi
 1. Jalankan server Backend (`node server.js` atau `npm run dev` pada direktori `backend`).
 2. Jalankan server Frontend (`npm run dev` pada direktori `frontend`).
 3. Login ke aplikasi menggunakan nomor HP `081100000001` (Admin) atau `081100000002` (Warga) dengan password `password123`.
-4. Klik tab menu **Data Warga**, **Informasi Kegiatan**, atau **Master RT-RW** pada Sidebar.
-5. Gunakan tombol aksi di masing-masing menu untuk mencoba fitur interaktif. Warga hanya memiliki hak akses *read-only* untuk Informasi Kegiatan dan Master RT-RW.
+4. Klik tab menu **Data Warga**, **Informasi Kegiatan**, **Master RT-RW**, atau **Master Petugas** pada Sidebar.
+5. Gunakan tombol aksi di masing-masing menu untuk mencoba fitur interaktif. Warga hanya memiliki hak akses *read-only* untuk Informasi Kegiatan, Master RT-RW, dan Master Petugas.

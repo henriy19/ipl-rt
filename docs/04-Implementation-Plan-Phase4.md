@@ -68,6 +68,15 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/rt-rw` dengan layout terproteksi.
 - **`frontend/src/features/master/RtRw.jsx` [NEW]**: Halaman manajemen RT-RW berformat tabbed layout (Tab RT & Tab RW) lengkap dengan metrik statistik, filter pencarian, dan modal interaktif CRUD.
 
+### 8. Fitur CRUD & Manajemen Petugas (Baru)
+- **`backend/src/models/petugasModel.js` [NEW]**: Query PostgreSQL aman untuk CRUD tabel `master_petugas` dengan join ke `users` untuk mengambil nama dan nomor handphone.
+- **`backend/src/controllers/petugasController.js` [NEW]**: Logic API Petugas, validasi penunjukan warga dari dropdownlist, dan pencegahan duplikasi pendaftaran satu warga menjadi petugas ganda.
+- **`backend/src/routes/petugasRoutes.js` [NEW]**: Endpoint `/api/petugas` terproteksi JWT & hak akses pengurus (RBAC).
+- **`backend/src/app.js` [MODIFY]**: Registrasi router `/api/petugas`.
+- **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Penambahan menu "Master Petugas" (Contact icon) pada kelompok Data Master.
+- **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/petugas`.
+- **`frontend/src/features/master/Petugas.jsx` [NEW]**: Halaman manajemen Petugas berisi visualisasi tabel, metrik ringkasan (Petugas Aktif/Non-aktif), dan modal CRUD dengan dropdown input bersumber dari data warga (`users`).
+
 ---
 
 ## Verification Plan
@@ -90,3 +99,9 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
    - Memverifikasi pencegahan duplikasi nomor RT pada RW yang sama.
    - Memverifikasi integrasi validasi relasi asing: Penolakan hapus RW jika masih memiliki RT, dan penolakan hapus RT jika masih memiliki warga.
    - Memverifikasi bahwa data RT/RW yang baru dibuat langsung tersinkronisasi di dropdown pendaftaran Data Warga.
+6. **Petugas CRUD Management Verification**:
+   - Memverifikasi pembacaan dropdown warga aktif saat menambah petugas baru.
+   - Memverifikasi penyimpanan data petugas (UUID, user_id, jabatan, status) ke database PostgreSQL.
+   - Memverifikasi pencegahan penunjukan satu warga sebagai petugas lebih dari satu kali (unik check).
+   - Memverifikasi aksi ubah jabatan/status keaktifan petugas, dan penghapusan petugas terintegrasi.
+   - Memastikan pembatasan RBAC agar hanya peran pengurus yang dapat memodifikasi data.
