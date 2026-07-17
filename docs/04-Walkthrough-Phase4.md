@@ -119,13 +119,16 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 1. **Data Warga**: Dropdown pilihan RT/RW dan Peran (Role) di form Tambah/Edit Warga.
 2. **Master RT-RW**: Dropdown pilihan RW Penaung di form Tambah/Edit RT.
 3. **Informasi Kegiatan**: Dropdown pilihan Kategori Kegiatan di form Tambah/Edit Kegiatan.
-4. **Transaksi Iuran**: Dropdown pilihan Metode Pembayaran di form Pembayaran/Verifikasi Iuran.
+4. **Transaksi Iuran (Form Pembayaran)**: Dropdown pilihan Metode Pembayaran di form Pembayaran/Verifikasi Iuran.
+5. **Transaksi Iuran (Filter Utama)**: Dropdown filter Bulan, Tahun, dan Status di bagian filter dashboard depan halaman Transaksi.
 
 #### Rekaman Demo Penyesuaian Dropdown Global
 - Demo Verifikasi Refactor Dropdown Global:
   ![verify_all_custom_selects_refactor](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_all_custom_selects_refactor_1784199795978.webp)
 - Demo Verifikasi Kategori Dropdown Fix (Sukses Tanpa Crash):
   ![verify_informasi_kategori_dropdown_fix](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_informasi_kategori_dropdown_fix_1784200198202.webp)
+- Demo Verifikasi Dropdown Filter Utama Transaksi:
+  ![verify_transaksi_filter_dropdowns](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_transaksi_filter_dropdowns_1784201465583.webp)
 
 ---
 

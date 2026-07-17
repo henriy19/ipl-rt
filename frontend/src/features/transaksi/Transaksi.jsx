@@ -46,6 +46,11 @@ const Transaksi = () => {
     // Custom Dropdown States for Metode Pembayaran
     const [isMetodeDropdownOpen, setIsMetodeDropdownOpen] = useState(false);
 
+    // Custom Dropdown States for main filters
+    const [isBulanFilterOpen, setIsBulanFilterOpen] = useState(false);
+    const [isTahunFilterOpen, setIsTahunFilterOpen] = useState(false);
+    const [isStatusFilterOpen, setIsStatusFilterOpen] = useState(false);
+
     const [payMode, setPayMode] = useState('direct'); // 'direct', 'verify', 'submit'
     const [genLoading, setGenLoading] = useState(false);
     const [clearLoading, setClearLoading] = useState(false);
@@ -201,6 +206,21 @@ const Transaksi = () => {
         }
     };
 
+    const handleSelectBulanFilter = (val) => {
+        setFilterBulan(val);
+        setIsBulanFilterOpen(false);
+    };
+
+    const handleSelectTahunFilter = (val) => {
+        setFilterTahun(val);
+        setIsTahunFilterOpen(false);
+    };
+
+    const handleSelectStatusFilter = (val) => {
+        setFilterStatus(val);
+        setIsStatusFilterOpen(false);
+    };
+
     // Open Modal Pembayaran
     const handleSelectMetode = (val) => {
         setPayForm(prev => ({ ...prev, metode_pembayaran: val }));
@@ -281,6 +301,26 @@ const Transaksi = () => {
         { value: 'transfer', label: 'Transfer Bank / E-Wallet' }
     ];
     const selectedMetodeObj = metodeOptions.find(opt => opt.value === payForm.metode_pembayaran);
+
+    const bulanOptions = Array.from({ length: 12 }, (_, i) => ({
+        value: i + 1,
+        label: getNamaBulan(i + 1)
+    }));
+
+    const tahunOptions = [2024, 2025, 2026, 2027, 2028].map(yr => ({
+        value: yr,
+        label: yr.toString()
+    }));
+
+    const statusOptions = [
+        { value: 'all', label: 'Semua Status' },
+        { value: 'paid', label: 'Lunas' },
+        { value: 'unpaid', label: 'Belum Lunas' }
+    ];
+
+    const selectedBulanObj = bulanOptions.find(opt => opt.value === parseInt(filterBulan, 10));
+    const selectedTahunObj = tahunOptions.find(opt => opt.value === parseInt(filterTahun, 10));
+    const selectedStatusObj = statusOptions.find(opt => opt.value === filterStatus);
 
     return (
         <div className="space-y-6">
@@ -396,42 +436,134 @@ const Transaksi = () => {
                     {isAuthorized && (
                         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
                             {/* Bulan */}
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 relative">
                                 <Calendar size={16} className="text-emerald-600" />
-                                <select
-                                    value={filterBulan}
-                                    onChange={(e) => setFilterBulan(e.target.value)}
-                                    className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold"
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsBulanFilterOpen(!isBulanFilterOpen);
+                                        setIsTahunFilterOpen(false);
+                                        setIsStatusFilterOpen(false);
+                                    }}
+                                    className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold flex items-center justify-between min-w-[110px]"
                                 >
-                                    {Array.from({ length: 12 }, (_, i) => (
-                                        <option key={i + 1} value={i + 1}>
-                                            {getNamaBulan(i + 1)}
-                                        </option>
-                                    ))}
-                                </select>
+                                    <span>{selectedBulanObj ? selectedBulanObj.label : 'Bulan'}</span>
+                                    <svg className="ml-2 h-4 w-4 text-emerald-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                {isBulanFilterOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setIsBulanFilterOpen(false)}></div>
+                                        <div className="absolute z-20 mt-9 w-40 bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in right-0 sm:left-0">
+                                            <div className="overflow-y-auto max-h-56 divide-y divide-emerald-50/30">
+                                                {bulanOptions.map((opt) => {
+                                                    const isSelected = opt.value === parseInt(filterBulan, 10);
+                                                    return (
+                                                        <div
+                                                            key={opt.value}
+                                                            onClick={() => handleSelectBulanFilter(opt.value)}
+                                                            className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                            }`}
+                                                        >
+                                                            <span className="font-semibold">{opt.label}</span>
+                                                            {isSelected && <CheckCircle size={12} className="text-emerald-600" />}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             {/* Tahun */}
-                            <select
-                                value={filterTahun}
-                                onChange={(e) => setFilterTahun(e.target.value)}
-                                className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold"
-                            >
-                                {[2024, 2025, 2026, 2027, 2028].map(yr => (
-                                    <option key={yr} value={yr}>{yr}</option>
-                                ))}
-                            </select>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsTahunFilterOpen(!isTahunFilterOpen);
+                                        setIsBulanFilterOpen(false);
+                                        setIsStatusFilterOpen(false);
+                                    }}
+                                    className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold flex items-center justify-between min-w-[85px]"
+                                >
+                                    <span>{selectedTahunObj ? selectedTahunObj.label : 'Tahun'}</span>
+                                    <svg className="ml-2 h-4 w-4 text-emerald-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                {isTahunFilterOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setIsTahunFilterOpen(false)}></div>
+                                        <div className="absolute z-20 mt-1.5 w-32 bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in right-0 sm:left-0">
+                                            <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                {tahunOptions.map((opt) => {
+                                                    const isSelected = opt.value === parseInt(filterTahun, 10);
+                                                    return (
+                                                        <div
+                                                            key={opt.value}
+                                                            onClick={() => handleSelectTahunFilter(opt.value)}
+                                                            className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                            }`}
+                                                        >
+                                                            <span className="font-semibold">{opt.label}</span>
+                                                            {isSelected && <CheckCircle size={12} className="text-emerald-600" />}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
                             {/* Status */}
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                                className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold"
-                            >
-                                <option value="all">Semua Status</option>
-                                <option value="paid">Lunas</option>
-                                <option value="unpaid">Belum Lunas</option>
-                            </select>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsStatusFilterOpen(!isStatusFilterOpen);
+                                        setIsBulanFilterOpen(false);
+                                        setIsTahunFilterOpen(false);
+                                    }}
+                                    className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold flex items-center justify-between min-w-[130px]"
+                                >
+                                    <span>{selectedStatusObj ? selectedStatusObj.label : 'Status'}</span>
+                                    <svg className="ml-2 h-4 w-4 text-emerald-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                {isStatusFilterOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setIsStatusFilterOpen(false)}></div>
+                                        <div className="absolute z-20 mt-1.5 w-40 bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in right-0 sm:left-0">
+                                            <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                {statusOptions.map((opt) => {
+                                                    const isSelected = opt.value === filterStatus;
+                                                    return (
+                                                        <div
+                                                            key={opt.value}
+                                                            onClick={() => handleSelectStatusFilter(opt.value)}
+                                                            className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                            }`}
+                                                        >
+                                                            <span className="font-semibold">{opt.label}</span>
+                                                            {isSelected && <CheckCircle size={12} className="text-emerald-600" />}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
                             <button 
                                 onClick={fetchTransactions}
