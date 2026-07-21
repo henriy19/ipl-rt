@@ -15,7 +15,9 @@ import {
     X,
     Save,
     AlertTriangle,
-    Info
+    Info,
+    FileSpreadsheet,
+    Download
 } from 'lucide-react';
 
 const Warga = () => {
@@ -32,6 +34,13 @@ const Warga = () => {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+    // Excel Upload States
+    const [isUploadOpen, setIsUploadOpen] = useState(false);
+    const [uploadFile, setUploadFile] = useState(null);
+    const [uploadLoading, setUploadLoading] = useState(false);
+    const [uploadError, setUploadError] = useState('');
+    const [uploadSuccess, setUploadSuccess] = useState('');
 
     // Selected Warga & Form States
     const [selectedWarga, setSelectedWarga] = useState(null);
@@ -210,6 +219,62 @@ const Warga = () => {
         setIsDeleteOpen(true);
     };
 
+    const openUploadModal = () => {
+        setUploadFile(null);
+        setUploadError('');
+        setUploadSuccess('');
+        setIsUploadOpen(true);
+    };
+
+    const handleFileChange = (e) => {
+        setUploadFile(e.target.files[0]);
+        setUploadError('');
+        setUploadSuccess('');
+    };
+
+    const handleUploadSubmit = async (e) => {
+        e.preventDefault();
+        if (!uploadFile) {
+            setUploadError('Pilih berkas Excel terlebih dahulu');
+            return;
+        }
+
+        try {
+            setUploadLoading(true);
+            setUploadError('');
+            setUploadSuccess('');
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const base64 = event.target.result;
+                    const res = await api.post('/users/upload-excel', { file: base64 });
+                    if (res.data && res.data.status === 'success') {
+                        setUploadSuccess(res.data.message || 'Data warga berhasil di-upsert');
+                        fetchWarga();
+                        setUploadFile(null);
+                    } else {
+                        setUploadError(res.data.message || 'Gagal mengunggah data');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    setUploadError(err.response?.data?.message || 'Gagal terhubung ke server');
+                } finally {
+                    setUploadLoading(false);
+                }
+            };
+            reader.onerror = () => {
+                setUploadError('Gagal membaca berkas');
+                setUploadLoading(false);
+            };
+            reader.readAsDataURL(uploadFile);
+        } catch (err) {
+            console.error(err);
+            setUploadError('Terjadi kesalahan saat memproses berkas');
+            setUploadLoading(false);
+        }
+    };
+
     // Action Handlers
     const handleAddSubmit = async (e) => {
         e.preventDefault();
@@ -293,13 +358,30 @@ const Warga = () => {
                         Kelola data warga RT secara terpusat, tertib, dan aman.
                     </p>
                 </div>
-                <button 
-                    onClick={openAddModal}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-sm shadow-emerald-100 hover:shadow-md transition-all cursor-pointer"
-                >
-                    <UserPlus size={18} />
-                    <span>Tambah Warga</span>
-                </button>
+                <div className="flex gap-2">
+                    <a 
+                        href="/template_data_warga.xlsx" 
+                        download="template_data_warga.xlsx"
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-emerald-200 hover:bg-emerald-50 text-emerald-700 font-semibold text-sm rounded-xl shadow-sm transition-all cursor-pointer"
+                    >
+                        <Download size={18} />
+                        <span>Download Template</span>
+                    </a>
+                    <button 
+                        onClick={openUploadModal}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-sm rounded-xl shadow-sm transition-all cursor-pointer"
+                    >
+                        <FileSpreadsheet size={18} />
+                        <span>Upload Excel</span>
+                    </button>
+                    <button 
+                        onClick={openAddModal}
+                        className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow-sm shadow-emerald-100 hover:shadow-md transition-all cursor-pointer"
+                    >
+                        <UserPlus size={18} />
+                        <span>Tambah Warga</span>
+                    </button>
+                </div>
             </div>
 
             {/* Stats Overview */}
@@ -502,6 +584,112 @@ const Warga = () => {
                     </div>
                 )}
             </div>
+
+            {/* MODAL: UPLOAD EXCEL */}
+            {isUploadOpen && (
+                <div className="fixed inset-0 bg-emerald-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl border border-emerald-50 max-w-lg w-full overflow-hidden shadow-2xl animate-fade-in flex flex-col max-h-[90vh]">
+                        {/* Header */}
+                        <div className="px-6 py-4 bg-emerald-50 border-b border-emerald-100 flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-emerald-950 flex items-center gap-2">
+                                <FileSpreadsheet className="text-emerald-600" size={20} />
+                                Upload Data Warga via Excel
+                            </h3>
+                            <button onClick={() => setIsUploadOpen(false)} className="text-emerald-700 hover:text-emerald-900 cursor-pointer">
+                                <X size={20} />
+                            </button>
+                        </div>
+                        {/* Content */}
+                        <form onSubmit={handleUploadSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
+                            {uploadError && (
+                                <div className="p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold flex items-center gap-2 border border-red-100">
+                                    <AlertCircle size={16} />
+                                    <span>{uploadError}</span>
+                                </div>
+                            )}
+                            {uploadSuccess && (
+                                <div className="p-3 bg-emerald-50 text-emerald-700 rounded-xl text-xs font-semibold flex items-center gap-2 border border-emerald-100">
+                                    <CheckCircle size={16} />
+                                    <span>{uploadSuccess}</span>
+                                </div>
+                            )}
+
+                            <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 text-xs text-emerald-950 space-y-2">
+                                <p className="font-bold flex items-center gap-1">
+                                    <Info size={14} className="text-emerald-600" />
+                                    Petunjuk Struktur Kolom Excel:
+                                </p>
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li><b>Nama Lengkap</b> (Wajib)</li>
+                                    <li><b>No HP</b> (Wajib, Unik sebagai kunci data)</li>
+                                    <li><b>Blok</b>, <b>No Rumah</b> (Opsional)</li>
+                                    <li><b>Status Hunian</b> (Opsional: pemilik / penyewa)</li>
+                                    <li><b>Jumlah Penghuni</b> (Opsional, angka)</li>
+                                    <li><b>Peran</b> (Opsional: Admin / Warga / Petugas / Bendahara)</li>
+                                    <li><b>RT</b>, <b>RW</b> (Opsional, angka RT dan RW penaung)</li>
+                                </ul>
+                                <p className="text-emerald-700 font-medium pt-1">
+                                    * Data warga lama dengan nomor HP yang sama akan diperbarui (upsert).
+                                </p>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2">Pilih Berkas Excel (.xlsx / .xls)</label>
+                                <input
+                                    type="file"
+                                    accept=".xlsx, .xls"
+                                    onChange={handleFileChange}
+                                    className="block w-full text-sm text-emerald-950 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                                    required
+                                />
+                            </div>
+
+                            {uploadFile && (
+                                <div className="text-xs text-emerald-700 font-medium">
+                                    Berkas terpilih: <span className="font-bold text-emerald-950">{uploadFile.name}</span> ({(uploadFile.size / 1024).toFixed(1)} KB)
+                                </div>
+                            )}
+
+                            <div className="pt-4 flex items-center justify-between border-t border-emerald-100">
+                                <a 
+                                    href="/template_data_warga.xlsx" 
+                                    download="template_data_warga.xlsx"
+                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+                                >
+                                    <FileSpreadsheet size={14} />
+                                    Unduh Template Excel
+                                </a>
+                                <div className="flex gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsUploadOpen(false)}
+                                        className="px-4 py-2 border border-emerald-100 rounded-xl text-sm font-medium text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={uploadLoading}
+                                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center gap-2"
+                                    >
+                                        {uploadLoading ? (
+                                            <>
+                                                <Loader2 className="animate-spin" size={16} />
+                                                <span>Mengunggah...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save size={16} />
+                                                <span>Mulai Upload</span>
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* MODAL: TAMBAH WARGA */}
             {isAddOpen && (

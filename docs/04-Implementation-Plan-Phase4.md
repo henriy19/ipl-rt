@@ -77,6 +77,19 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`frontend/src/App.jsx` [MODIFY]**: Registrasi rute `/struktur`.
 - **`frontend/src/features/master/StrukturOrganisasi.jsx` [NEW]**: Halaman manajemen Struktur Organisasi berisi visualisasi tabel kepengurusan, metrik ringkasan pengurus aktif, dan modal CRUD dengan dropdown input dinamis bersumber dari data warga, data role (jabatan), dan data RT-RW.
 
+### 9. Fitur Upload & Upsert Data Warga via Excel (Baru)
+- **`backend/src/routes/userRoutes.js` [MODIFY]**: Pendaftaran endpoint `POST /api/users/upload-excel` terproteksi JWT.
+- **`backend/src/controllers/userController.js` [MODIFY]**: Implementasi controller `UploadExcelWarga` untuk memecah Base64 file excel, memparsing dengan library `xlsx`, melakukan pencocokan relasi RT/RW dan Role, serta melakukan upsert dengan `ON CONFLICT (no_hp) DO UPDATE SET...` di database.
+- **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan tombol "Download Template" dan "Upload Excel" di header serta modal dialog form upload, pembacaan file dengan `FileReader` ke Base64, pengiriman ke backend, dan pembaruan visual tabel secara real-time.
+
+### 10. Fitur Laporan Data Warga dengan Filter RT (Baru)
+- **`frontend/src/features/laporan/Laporan.jsx` [MODIFY]**:
+  - Penambahan antarmuka tab (Tab Laporan Keuangan & Tab Laporan Data Warga).
+  - Pemuatan data warga (`/api/users`) dan RT (`/api/rt`) secara dinamis di halaman Laporan.
+  - Implementasi dropdown filter RT kustom untuk menyaring daftar warga yang ditampilkan.
+  - Penyajian ringkasan statistik (Total KK, Total Jiwa, Hunian Pemilik/Penyewa) sesuai RT yang dipilih.
+  - Penambahan tombol "Ekspor PDF Data Warga" yang secara langsung mengunduh/menyimpan berkas PDF daftar warga terpilih dengan kop surat dan layout tabel bersih (tanpa memicu dialog cetak printer).
+
 ---
 
 ## Verification Plan
@@ -105,3 +118,11 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
    - Memverifikasi pencegahan penunjukan satu warga sebagai pengurus lebih dari satu kali.
    - Memverifikasi aksi ubah jabatan (role), RT penugasan, dan status keaktifan pengurus.
    - Memastikan pembatasan RBAC agar hanya peran pengurus yang dapat memodifikasi data.
+7. **Excel Bulk Upload & Upsert Verification**:
+   - Menyiapkan berkas excel berisi data warga lama (yang akan di-update) dan data warga baru (yang akan di-insert).
+   - Mengunggah berkas tersebut via UI Admin, memverifikasi status response dari backend.
+   - Memastikan data warga ter-upsert dengan benar di database dan ter-render di tabel frontend secara real-time.
+8. **Citizen Data Report & RT Filter Verification**:
+   - Menavigasi ke menu "Laporan" -> klik tab "Laporan Data Warga".
+   - Mengubah filter dropdown RT dan memastikan tabel warga serta metrik statistik (Total KK, Total Jiwa) ter-update secara real-time.
+   - Mengklik tombol "Ekspor PDF Data Warga" dan memverifikasi layout PDF Kop Surat laporan warga terunduh dengan benar.

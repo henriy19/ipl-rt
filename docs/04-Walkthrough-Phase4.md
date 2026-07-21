@@ -130,6 +130,22 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 - Demo Verifikasi Dropdown Filter Utama Transaksi:
   ![verify_transaksi_filter_dropdowns](C:/Users/IDX-203/.gemini/antigravity-ide/brain/9387bfd5-4de8-4aab-bd53-3424984850b0/verify_transaksi_filter_dropdowns_1784201465583.webp)
 
+### F. Fitur Upload & Upsert Data Warga via Excel (Baru)
+1. **Unduh Template**: Admin mengklik tombol "Download Template" di header halaman Data Warga untuk menyimpan cetakan format berkas Excel yang benar di komputernya.
+2. **Pemicu Aksi**: Admin mengklik tombol "Upload Excel" di header halaman Data Warga.
+3. **Modal Dialog**: Muncul modal dialog yang memuat panduan struktur kolom Excel yang dibutuhkan.
+4. **Pemrosesan File**: Admin memilih file Excel (.xlsx / .xls), lalu mengklik "Mulai Upload". File diubah ke format Base64 dan diposting ke `/api/users/upload-excel`.
+5. **Pembaruan & Upsert di Database**: Backend memproses file Excel tersebut. Warga dengan nomor HP yang sudah ada akan di-update datanya (upsert), sedangkan warga dengan nomor HP baru akan di-insert secara otomatis dengan password bawaan `password123`.
+6. **Konfirmasi Sukses**: Setelah proses selesai, halaman akan memuat pesan sukses dari response server dan tabel data warga akan ter-refresh otomatis untuk menampilkan data ter-update.
+
+### G. Fitur Laporan Data Warga dengan Filter RT (Baru)
+1. **Navigasi**: Pengguna menavigasi ke menu "Laporan" pada sidebar.
+2. **Perpindahan Tab**: Pengguna mengklik tab "Laporan Data Warga".
+3. **Filter RT**: Pengguna memilih nomor RT dari dropdown filter kustom (misal: "RT 001").
+4. **Metrik Statistik**: Sistem menampilkan metrik ringkasan untuk RT terpilih secara dinamis: Total Kepala Keluarga (KK), Total Populasi (Jiwa), Jumlah Pemilik Hunian, dan Jumlah Penyewa Hunian.
+5. **Daftar Warga**: Tabel menampilkan seluruh warga di RT terpilih beserta informasi Nama Lengkap, Nomor HP, Alamat, Status Hunian, Jumlah Penghuni, dan Status Keaktifan.
+6. **Ekspor Laporan PDF**: Pengguna mengklik tombol "Ekspor PDF Data Warga". Sistem membuat lembar laporan warga berformat kop surat resmi dan secara langsung menyimpannya sebagai file PDF (.pdf) di folder download tanpa memicu dialog cetak printer bawaan browser.
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi

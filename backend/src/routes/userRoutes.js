@@ -4,7 +4,8 @@ const {
     GetWargaById, 
     CreateWarga, 
     UpdateWarga, 
-    DeleteWarga 
+    DeleteWarga,
+    UploadExcelWarga
 } = require('../controllers/userController');
 const { protect } = require('../middlewares/authMiddleware');
 
@@ -16,6 +17,8 @@ router.use(protect);
 router.route('/')
     .get(GetAllWarga)
     .post(CreateWarga);
+
+router.post('/upload-excel', UploadExcelWarga);
 
 router.route('/:id')
     .get(GetWargaById)
