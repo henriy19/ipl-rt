@@ -146,9 +146,12 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 5. **Daftar Warga**: Tabel menampilkan seluruh warga di RT terpilih beserta informasi Nama Lengkap, Nomor HP, Alamat, Status Hunian, Jumlah Penghuni, dan Status Keaktifan.
 6. **Ekspor Laporan PDF**: Pengguna mengklik tombol "Ekspor PDF Data Warga". Sistem membuat lembar laporan warga berformat kop surat resmi dan secara langsung menyimpannya sebagai file PDF (.pdf) di folder download tanpa memicu dialog cetak printer bawaan browser.
 
-### H. Perubahan Nama Dashboard Menjadi Beranda (Baru)
+### H. Perubahan Nama Dashboard Menjadi Beranda & Penyesuaian Lebar Penuh Halaman (Baru)
 1. **Navigasi Sidebar**: Pengguna melihat menu teratas pada sidebar kini menampilkan teks "Beranda" (sebelumnya "Dashboard").
 2. **Halaman Utama**: Saat diklik, pengguna dialihkan ke halaman utama dengan judul "Beranda", dan tata letak dasbor melebar memenuhi lebar layar tanpa menyisakan ruang kosong besar di sisi kanan dan kiri.
+
+### I. Penyesuaian Lebar Penuh Halaman Informasi & Kegiatan (Baru)
+1. **Halaman Informasi & Kegiatan**: Saat menavigasi ke menu "Informasi Kegiatan", tata letak daftar pengumuman melebar memenuhi lebar layar tanpa menyisakan ruang kosong besar di sisi kanan dan kiri.
 
 ---
 

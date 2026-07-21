@@ -90,9 +90,10 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
   - Penyajian ringkasan statistik (Total KK, Total Jiwa, Hunian Pemilik/Penyewa) sesuai RT yang dipilih.
   - Penambahan tombol "Ekspor PDF Data Warga" yang secara langsung mengunduh/menyimpan berkas PDF daftar warga terpilih dengan kop surat dan layout tabel bersih (tanpa memicu dialog cetak printer).
 
-### 11. Perubahan Nama Dashboard Menjadi Beranda (Baru)
+### 11. Perubahan Nama Dashboard Menjadi Beranda & Penyesuaian Lebar Penuh Halaman (Baru)
 - **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Mengubah nama menu navigasi dari "Dashboard" menjadi "Beranda".
 - **`frontend/src/features/dashboard/Dashboard.jsx` [MODIFY]**: Mengubah judul halaman utama (heading) dari "Dashboard" menjadi "Beranda", serta menghapus batasan lebar maksimal `max-w-7xl mx-auto` agar tampilan halaman Beranda mengisi lebar penuh tanpa ruang kosong di samping kanan-kiri.
+- **`frontend/src/features/informasi/Informasi.jsx` [MODIFY]**: Menghapus batasan lebar maksimal `max-w-7xl mx-auto` agar tampilan halaman Informasi & Kegiatan mengisi lebar penuh tanpa ruang kosong di samping kanan-kiri.
 
 ---
 
@@ -130,6 +131,10 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
    - Menavigasi ke menu "Laporan" -> klik tab "Laporan Data Warga".
    - Mengubah filter dropdown RT dan memastikan tabel warga serta metrik statistik (Total KK, Total Jiwa) ter-update secara real-time.
    - Mengklik tombol "Ekspor PDF Data Warga" dan memverifikasi layout PDF Kop Surat laporan warga terunduh dengan benar.
-9. **Dashboard Renaming to Beranda Verification**:
+9. **Dashboard Renaming to Beranda & Layout Verification**:
    - Memastikan menu navigasi paling atas di sidebar menampilkan nama "Beranda".
    - Memastikan saat menu tersebut diklik, judul halaman utama (heading) menampilkan kata "Beranda".
+   - Memverifikasi bahwa tata letak halaman Beranda mengisi lebar penuh tanpa ruang kosong di sisi kanan-kiri.
+10. **Informasi & Kegiatan Layout Verification**:
+    - Menavigasi ke menu "Informasi Kegiatan".
+    - Memverifikasi bahwa tata letak halaman Informasi & Kegiatan mengisi lebar penuh tanpa ruang kosong di sisi kanan-kiri.
