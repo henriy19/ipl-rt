@@ -159,7 +159,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-emerald-950 tracking-tight">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-emerald-950 tracking-tight">Beranda</h1>
         <p className="text-emerald-600/80 text-sm mt-1.5">Selamat datang kembali! Berikut ringkasan Wargatify Anda.</p>
       </div>
 

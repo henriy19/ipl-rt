@@ -4,7 +4,7 @@ import { LayoutDashboard, Users, CreditCard, ReceiptText, FileBarChart, X, Shiel
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
+    { name: 'Beranda', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Data Warga', path: '/warga', icon: <Users size={20} /> },
     { name: 'Informasi Kegiatan', path: '/informasi', icon: <Megaphone size={20} /> },
     { name: 'Transaksi', path: '/transaksi', icon: <ReceiptText size={20} /> },

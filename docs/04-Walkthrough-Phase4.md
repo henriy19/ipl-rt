@@ -146,6 +146,10 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 5. **Daftar Warga**: Tabel menampilkan seluruh warga di RT terpilih beserta informasi Nama Lengkap, Nomor HP, Alamat, Status Hunian, Jumlah Penghuni, dan Status Keaktifan.
 6. **Ekspor Laporan PDF**: Pengguna mengklik tombol "Ekspor PDF Data Warga". Sistem membuat lembar laporan warga berformat kop surat resmi dan secara langsung menyimpannya sebagai file PDF (.pdf) di folder download tanpa memicu dialog cetak printer bawaan browser.
 
+### H. Perubahan Nama Dashboard Menjadi Beranda (Baru)
+1. **Navigasi Sidebar**: Pengguna melihat menu teratas pada sidebar kini menampilkan teks "Beranda" (sebelumnya "Dashboard").
+2. **Halaman Utama**: Saat diklik, pengguna dialihkan ke halaman utama dan judul halaman (heading) yang tertera adalah "Beranda".
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi
