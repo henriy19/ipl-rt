@@ -148,7 +148,7 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 
 ### H. Perubahan Nama Dashboard Menjadi Beranda (Baru)
 1. **Navigasi Sidebar**: Pengguna melihat menu teratas pada sidebar kini menampilkan teks "Beranda" (sebelumnya "Dashboard").
-2. **Halaman Utama**: Saat diklik, pengguna dialihkan ke halaman utama dan judul halaman (heading) yang tertera adalah "Beranda".
+2. **Halaman Utama**: Saat diklik, pengguna dialihkan ke halaman utama dengan judul "Beranda", dan tata letak dasbor melebar memenuhi lebar layar tanpa menyisakan ruang kosong besar di sisi kanan dan kiri.
 
 ---
 

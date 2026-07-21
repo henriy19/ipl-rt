@@ -92,7 +92,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 
 ### 11. Perubahan Nama Dashboard Menjadi Beranda (Baru)
 - **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Mengubah nama menu navigasi dari "Dashboard" menjadi "Beranda".
-- **`frontend/src/features/dashboard/Dashboard.jsx` [MODIFY]**: Mengubah judul halaman utama (heading) dari "Dashboard" menjadi "Beranda".
+- **`frontend/src/features/dashboard/Dashboard.jsx` [MODIFY]**: Mengubah judul halaman utama (heading) dari "Dashboard" menjadi "Beranda", serta menghapus batasan lebar maksimal `max-w-7xl mx-auto` agar tampilan halaman Beranda mengisi lebar penuh tanpa ruang kosong di samping kanan-kiri.
 
 ---
 
