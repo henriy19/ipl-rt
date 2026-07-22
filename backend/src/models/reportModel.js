@@ -1,18 +1,28 @@
 const pool = require('../config/db');
 
 const Report = {
-    // Get aggregated paid monthly income for a year
-    async getPemasukanBulanan(tahun) {
-        const query = `
+    // Get aggregated paid monthly income for a year with optional RT filter
+    async getPemasukanBulanan(tahun, rtId) {
+        let query = `
             SELECT 
                 t.bulan, 
                 SUM(t.nominal_tagihan) AS total
             FROM tagihan t
+            JOIN users u ON t.user_id = u.id
             WHERE t.tahun = $1 AND t.status = 'paid'
+        `;
+        const params = [tahun];
+
+        if (rtId !== undefined && rtId !== '' && rtId !== null) {
+            params.push(rtId);
+            query += ` AND u.rt_id = $${params.length}`;
+        }
+
+        query += `
             GROUP BY t.bulan
             ORDER BY t.bulan ASC
         `;
-        const { rows } = await pool.query(query, [tahun]);
+        const { rows } = await pool.query(query, params);
         
         // Buat struktur default 12 bulan
         const rekapBulanan = Array.from({ length: 12 }, (_, i) => ({
@@ -32,7 +42,7 @@ const Report = {
     },
 
     // Get list of warga bills (all statuses) with filters
-    async getTunggakanWarga(bulan, tahun) {
+    async getTunggakanWarga(bulan, tahun, rtId) {
         let query = `
             SELECT 
                 t.id AS tagihan_id,
@@ -44,6 +54,7 @@ const Report = {
                 u.blok_rumah,
                 u.nomor_rumah,
                 u.no_hp,
+                u.rt_id,
                 rt.nomor_rt,
                 rw.nomor_rw,
                 mi.nama_iuran,
@@ -59,13 +70,17 @@ const Report = {
 
         const params = [];
         
-        if (bulan !== undefined && bulan !== '') {
+        if (bulan !== undefined && bulan !== '' && bulan !== null) {
             params.push(parseInt(bulan, 10));
             query += ` AND t.bulan = $${params.length}`;
         }
-        if (tahun !== undefined && tahun !== '') {
+        if (tahun !== undefined && tahun !== '' && tahun !== null) {
             params.push(parseInt(tahun, 10));
             query += ` AND t.tahun = $${params.length}`;
+        }
+        if (rtId !== undefined && rtId !== '' && rtId !== null) {
+            params.push(rtId);
+            query += ` AND u.rt_id = $${params.length}`;
         }
 
         query += ` ORDER BY t.tahun DESC, t.bulan DESC, u.nama_lengkap ASC`;

@@ -6,7 +6,7 @@ const GetRekapitulasi = async (req, res, next) => {
         const currentTahun = now.getFullYear();
         const currentBulan = now.getMonth() + 1;
 
-        let { tahun, bulan } = req.query;
+        let { tahun, bulan, rt_id } = req.query;
 
         tahun = tahun !== undefined ? parseInt(tahun, 10) : currentTahun;
         
@@ -15,13 +15,13 @@ const GetRekapitulasi = async (req, res, next) => {
         }
 
         // 1. Dapatkan rekap pemasukan bulanan sepanjang tahun
-        const pemasukanBulanan = await Report.getPemasukanBulanan(tahun);
+        const pemasukanBulanan = await Report.getPemasukanBulanan(tahun, rt_id);
         
         // Hitung total pemasukan dalam setahun
         const totalPemasukanTahunan = pemasukanBulanan.reduce((sum, item) => sum + item.total, 0);
 
         // 2. Dapatkan daftar seluruh tagihan warga
-        const tagihanWarga = await Report.getTunggakanWarga(bulan, tahun);
+        const tagihanWarga = await Report.getTunggakanWarga(bulan, tahun, rt_id);
 
         // Hitung total nilai tunggakan yang belum lunas (status != paid)
         const totalTunggakan = tagihanWarga
@@ -31,6 +31,7 @@ const GetRekapitulasi = async (req, res, next) => {
         return res.success('Berhasil mengambil data rekapitulasi laporan', {
             tahun,
             bulan_filter: bulan || 'Semua',
+            rt_id_filter: rt_id || '',
             total_pemasukan_tahunan: totalPemasukanTahunan,
             total_tunggakan: totalTunggakan,
             rekap_pemasukan_bulanan: pemasukanBulanan,

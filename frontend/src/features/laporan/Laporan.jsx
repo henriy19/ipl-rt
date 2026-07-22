@@ -55,7 +55,7 @@ const Laporan = () => {
             fetchReportData();
             fetchWargaData();
         }
-    }, [filterTahun, filterBulan]);
+    }, [filterTahun, filterBulan, filterRt]);
 
     const fetchWargaData = async () => {
         try {
@@ -89,7 +89,8 @@ const Laporan = () => {
             setError('');
             const params = {
                 tahun: filterTahun,
-                bulan: filterBulan
+                bulan: filterBulan,
+                rt_id: filterRt
             };
             const res = await api.get('/report/rekapitulasi', { params });
             if (res.data && res.data.status === 'success') {
@@ -669,6 +670,77 @@ const Laporan = () => {
                             </>
                         )}
                     </div>
+
+                    {/* Filter RT / RW */}
+                    <div className="flex items-center gap-2 text-sm text-emerald-950 font-semibold ml-0 sm:ml-4 relative">
+                        <span>Filter RT:</span>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsRtFilterOpen(!isRtFilterOpen);
+                                setIsTahunFilterOpen(false);
+                                setIsBulanFilterOpen(false);
+                            }}
+                            className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold flex items-center justify-between min-w-[150px] cursor-pointer"
+                        >
+                            <span>
+                                {filterRt 
+                                    ? `RT ${rtList.find(r => r.id === filterRt)?.nomor_rt || ''} / RW ${rtList.find(r => r.id === filterRt)?.nomor_rw || ''}` 
+                                    : 'Semua RT'}
+                            </span>
+                            <svg className="ml-2 h-4 w-4 text-emerald-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+
+                        {isRtFilterOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsRtFilterOpen(false)}></div>
+                                <div className="absolute z-20 mt-9 w-56 bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in left-0 sm:left-auto right-0 sm:right-auto">
+                                    <div className="p-2 border-b border-emerald-50">
+                                        <input
+                                            type="text"
+                                            placeholder="Cari RT..."
+                                            value={rtSearchTerm}
+                                            onChange={(e) => setRtSearchTerm(e.target.value)}
+                                            className="w-full px-3 py-1.5 border border-emerald-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                    <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                        <div
+                                            onClick={() => handleSelectRtFilter('')}
+                                            className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                filterRt === '' ? 'bg-emerald-50/50 font-bold' : ''
+                                            }`}
+                                        >
+                                            <span>Semua RT</span>
+                                            {filterRt === '' && <CheckCircle size={12} className="text-emerald-600" />}
+                                        </div>
+                                        {rtList
+                                            .filter(rt => {
+                                                const q = rtSearchTerm.toLowerCase();
+                                                return rt.nomor_rt.includes(q) || rt.nomor_rw.includes(q);
+                                            })
+                                            .map((rt) => {
+                                                const isSelected = rt.id === filterRt;
+                                                return (
+                                                    <div
+                                                        key={rt.id}
+                                                        onClick={() => handleSelectRtFilter(rt.id)}
+                                                        className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                            isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                        }`}
+                                                    >
+                                                        <span>RT {rt.nomor_rt} / RW {rt.nomor_rw}</span>
+                                                        {isSelected && <CheckCircle size={12} className="text-emerald-600" />}
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
             ) : (
                 <div className="bg-white p-4 rounded-2xl border border-emerald-50 shadow-sm flex flex-wrap items-center gap-3">
@@ -761,91 +833,103 @@ const Laporan = () => {
                     </div>
                 ) : (
                     <div className="space-y-6">
-                        {/* Summary Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-white p-6 rounded-3xl border border-emerald-50 shadow-sm flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Pemasukan Kas Lunas ({filterTahun})</p>
-                                    <p className="text-3xl font-bold text-emerald-950">{formatRupiah(rekapData.total_pemasukan_tahunan)}</p>
-                                </div>
-                                <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-inner">
-                                    <Coins size={28} />
-                                </div>
-                            </div>
+                        {(() => {
+                            const filteredDaftarTunggakan = (rekapData?.daftar_tunggakan || []).filter(item => {
+                                if (!filterRt) return true;
+                                return item.rt_id === filterRt;
+                            });
 
-                            <div className="bg-white p-6 rounded-3xl border border-rose-50 shadow-sm flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <p className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Total Tunggakan Aktif</p>
-                                    <p className="text-3xl font-bold text-rose-600">{formatRupiah(rekapData.total_tunggakan)}</p>
-                                </div>
-                                <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center shadow-inner">
-                                    <AlertTriangle size={28} />
-                                </div>
-                            </div>
-                        </div>
+                            const calculatedTotalTunggakan = filteredDaftarTunggakan
+                                .filter(item => item.status !== 'paid')
+                                .reduce((sum, item) => sum + parseFloat(item.nominal_tagihan || 0), 0);
 
-                        {/* Tables Grid */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Pemasukan Bulanan (Column Span 1) */}
-                            <div className="bg-white rounded-2xl border border-emerald-50 shadow-sm overflow-hidden flex flex-col">
-                                <div className="px-5 py-4 border-b border-emerald-50 bg-emerald-50/20">
-                                    <h3 className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
-                                        <TrendingUp size={16} className="text-emerald-700" />
-                                        <span>Rekap Bulanan</span>
-                                    </h3>
-                                </div>
-                                <div className="overflow-x-auto flex-1">
-                                    <table className="min-w-full divide-y divide-emerald-50">
-                                        <thead className="bg-emerald-50/10">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Bulan</th>
-                                                <th className="px-4 py-3 text-right text-xs font-semibold text-emerald-800 uppercase">Kas Masuk</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-emerald-50/50">
-                                            {rekapData.rekap_pemasukan_bulanan.map(item => (
-                                                <tr key={item.bulan} className="hover:bg-emerald-50/5 transition-colors">
-                                                    <td className="px-4 py-2.5 text-sm text-emerald-900 font-semibold">{getNamaBulan(item.bulan)}</td>
-                                                    <td className="px-4 py-2.5 text-sm text-emerald-950 font-bold text-right">{formatRupiah(item.total)}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            {/* Daftar Tunggakan (Column Span 2) */}
-                            <div className="bg-white rounded-2xl border border-emerald-50 shadow-sm overflow-hidden flex flex-col lg:col-span-2">
-                                <div className="px-5 py-4 border-b border-emerald-50 bg-emerald-50/20">
-                                    <h3 className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
-                                        <FileText size={16} className="text-emerald-600" />
-                                        <span>Status Pembayaran & Tagihan Warga ({filterBulan === '' ? 'Seluruh Bulan' : getNamaBulan(parseInt(filterBulan, 10))})</span>
-                                    </h3>
-                                </div>
-                                <div className="overflow-x-auto flex-1">
-                                    {rekapData.daftar_tunggakan.length === 0 ? (
-                                        <div className="py-24 text-center text-emerald-600/60 font-semibold text-sm">
-                                            Tidak ada data tagihan warga pada periode ini.
+                            return (
+                                <>
+                                    {/* Summary Cards */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-white p-6 rounded-3xl border border-emerald-50 shadow-sm flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Pemasukan Kas Lunas ({filterTahun})</p>
+                                                <p className="text-3xl font-bold text-emerald-950">{formatRupiah(rekapData.total_pemasukan_tahunan)}</p>
+                                            </div>
+                                            <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shadow-inner">
+                                                <Coins size={28} />
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <table className="min-w-full divide-y divide-emerald-50">
-                                            <thead className="bg-emerald-50/10">
-                                                <tr>
-                                                    <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Nama Warga</th>
-                                                    <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Alamat</th>
-                                                    <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Iuran</th>
-                                                    <th className="px-5 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Periode</th>
-                                                    <th className="px-5 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Status</th>
-                                                    <th className="px-5 py-3 text-right text-xs font-semibold text-emerald-800 uppercase">Nominal</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-emerald-50/50">
-                                                {rekapData.daftar_tunggakan.map(t => (
-                                                    <tr key={t.tagihan_id} className="hover:bg-emerald-50/5 transition-colors">
-                                                        <td className="px-5 py-3 text-sm font-semibold text-emerald-950">{t.nama_lengkap}</td>
-                                                        <td className="px-5 py-3 text-xs text-emerald-600 font-medium">
-                                                            Blok {t.blok_rumah || '-'}/{t.nomor_rumah || '-'} (RT {t.nomor_rt || '-'})
-                                                        </td>
+
+                                        <div className="bg-white p-6 rounded-3xl border border-rose-50 shadow-sm flex items-center justify-between">
+                                            <div className="space-y-1">
+                                                <p className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Total Tunggakan Aktif</p>
+                                                <p className="text-3xl font-bold text-rose-600">{formatRupiah(calculatedTotalTunggakan)}</p>
+                                            </div>
+                                            <div className="w-14 h-14 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center shadow-inner">
+                                                <AlertTriangle size={28} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Tables Grid */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        {/* Pemasukan Bulanan (Column Span 1) */}
+                                        <div className="bg-white rounded-2xl border border-emerald-50 shadow-sm overflow-hidden flex flex-col">
+                                            <div className="px-5 py-4 border-b border-emerald-50 bg-emerald-50/20">
+                                                <h3 className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
+                                                    <TrendingUp size={16} className="text-emerald-700" />
+                                                    <span>Rekap Bulanan</span>
+                                                </h3>
+                                            </div>
+                                            <div className="overflow-x-auto flex-1">
+                                                <table className="min-w-full divide-y divide-emerald-50">
+                                                    <thead className="bg-emerald-50/10">
+                                                        <tr>
+                                                            <th className="px-4 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Bulan</th>
+                                                            <th className="px-4 py-3 text-right text-xs font-semibold text-emerald-800 uppercase">Kas Masuk</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-emerald-50/50">
+                                                        {rekapData.rekap_pemasukan_bulanan.map(item => (
+                                                            <tr key={item.bulan} className="hover:bg-emerald-50/5 transition-colors">
+                                                                <td className="px-4 py-2.5 text-sm text-emerald-900 font-semibold">{getNamaBulan(item.bulan)}</td>
+                                                                <td className="px-4 py-2.5 text-sm text-emerald-950 font-bold text-right">{formatRupiah(item.total)}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                                        {/* Daftar Tunggakan (Column Span 2) */}
+                                        <div className="bg-white rounded-2xl border border-emerald-50 shadow-sm overflow-hidden flex flex-col lg:col-span-2">
+                                            <div className="px-5 py-4 border-b border-emerald-50 bg-emerald-50/20">
+                                                <h3 className="font-bold text-emerald-950 text-sm flex items-center gap-1.5">
+                                                    <FileText size={16} className="text-emerald-600" />
+                                                    <span>Status Pembayaran & Tagihan Warga ({filterBulan === '' ? 'Seluruh Bulan' : getNamaBulan(parseInt(filterBulan, 10))})</span>
+                                                </h3>
+                                            </div>
+                                            <div className="overflow-x-auto flex-1">
+                                                {filteredDaftarTunggakan.length === 0 ? (
+                                                    <div className="py-24 text-center text-emerald-600/60 font-semibold text-sm">
+                                                        Tidak ada data tagihan warga pada periode ini.
+                                                    </div>
+                                                ) : (
+                                                    <table className="min-w-full divide-y divide-emerald-50">
+                                                        <thead className="bg-emerald-50/10">
+                                                            <tr>
+                                                                <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Nama Warga</th>
+                                                                <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Alamat</th>
+                                                                <th className="px-5 py-3 text-left text-xs font-semibold text-emerald-800 uppercase">Iuran</th>
+                                                                <th className="px-5 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Periode</th>
+                                                                <th className="px-5 py-3 text-center text-xs font-semibold text-emerald-800 uppercase">Status</th>
+                                                                <th className="px-5 py-3 text-right text-xs font-semibold text-emerald-800 uppercase">Nominal</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-emerald-50/50">
+                                                            {filteredDaftarTunggakan.map(t => (
+                                                                <tr key={t.tagihan_id} className="hover:bg-emerald-50/5 transition-colors">
+                                                                    <td className="px-5 py-3 text-sm font-semibold text-emerald-950">{t.nama_lengkap}</td>
+                                                                    <td className="px-5 py-3 text-xs text-emerald-600 font-medium">
+                                                                        Blok {t.blok_rumah || '-'}/{t.nomor_rumah || '-'} (RT {t.nomor_rt || '-'})
+                                                                    </td>
                                                         <td className="px-5 py-3 text-sm text-emerald-900 font-semibold">{t.nama_iuran}</td>
                                                         <td className="px-5 py-3 text-xs text-emerald-600 font-semibold text-center">{getNamaBulan(t.bulan)} {t.tahun}</td>
                                                         <td className="px-5 py-3 text-center whitespace-nowrap">
@@ -871,10 +955,13 @@ const Laporan = () => {
                                             </tbody>
                                         </table>
                                     )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </>
+                    );
+                })()}
+            </div>
                 )
             ) : (
                 wargaLoading ? (

@@ -159,6 +159,11 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 3. **Pencarian dalam Dropdown RT**: Dropdown menyediakan input pencarian untuk menemukan nomor RT secara cepat.
 4. **Pembaruan Real-Time**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), tabel warga dan 4 kartu statistik (Total KK, Total Jiwa, Pemilik, Penyewa) langsung tersaring menampilkan data warga RT terpilih.
 
+### K. Fitur Filter RT pada Halaman Laporan Keuangan (Baru)
+1. **Navigasi**: Pengguna menavigasi ke menu "Laporan" -> tab "Laporan Keuangan".
+2. **Filter Bar**: Di samping filter Tahun dan Bulan Tunggakan, terdapat dropdown "Filter RT".
+3. **Pemberlakuan Query Database**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), sistem secara otomatis mengambil ulang data dari PostgreSQL untuk menyajikan angka Pemasukan Kas Lunas, Total Tunggakan Aktif, Rekap Pemasukan Bulanan, dan Daftar Tagihan khusus untuk RT terpilih.
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi

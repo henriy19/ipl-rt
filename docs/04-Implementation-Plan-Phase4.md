@@ -96,6 +96,10 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 ### 12. Fitur Filter RT - RW pada Halaman Data Warga (Baru)
 - **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian di sebelah bar pencarian utama, penyaringan tabel warga secara real-time sesuai RT terpilih, dan pembaruan statistik ringkasan (Total KK, Total Jiwa, Pemilik, Penyewa) secara otomatis.
 
+### 13. Fitur Filter RT pada Halaman Laporan Keuangan (Baru)
+- **`backend/src/models/reportModel.js` & `backend/src/controllers/reportController.js` [MODIFY]**: Dukungan parameter `rt_id` pada query SQL laporan rekapitulasi untuk memfilter pemasukan bulanan dan daftar tunggakan per RT.
+- **`frontend/src/features/laporan/Laporan.jsx` [MODIFY]**: Penambahan dropdown filter RT pada tab Laporan Keuangan yang secara otomatis meng-update angka Pemasukan Kas Lunas, Total Tunggakan Aktif, Rekap Bulanan, dan Tabel Tagihan per RT.
+
 ---
 
 ## Verification Plan
@@ -143,3 +147,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
     - Menavigasi ke menu "Data Warga".
     - Mengklik dropdown "RT/RW" di sebelah pencarian dan memilih nomor RT tertentu (misal: "RT 001").
     - Memverifikasi tabel warga dan 4 kartu statistik (Total KK, Total Jiwa, Pemilik, Penyewa) langsung tersaring menyajikan data warga dari RT terpilih.
+12. **Filter RT Halaman Laporan Keuangan Verification**:
+    - Menavigasi ke menu "Laporan" -> tab "Laporan Keuangan".
+    - Mengubah dropdown "Filter RT" dan memilih salah satu RT (misal: "RT 001").
+    - Memverifikasi Pemasukan Kas Lunas, Total Tunggakan, Rekap Bulanan, dan Tabel Tagihan langsung tersaring menyajikan data keuangan dari RT terpilih.
