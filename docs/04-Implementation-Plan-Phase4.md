@@ -93,7 +93,8 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 ### 11. Perubahan Nama Dashboard Menjadi Beranda & Penyesuaian Lebar Penuh Halaman (Baru)
 - **`frontend/src/layouts/Sidebar.jsx` [MODIFY]**: Mengubah nama menu navigasi dari "Dashboard" menjadi "Beranda".
 - **`frontend/src/features/dashboard/Dashboard.jsx` [MODIFY]**: Mengubah judul halaman utama (heading) dari "Dashboard" menjadi "Beranda", serta menghapus batasan lebar maksimal `max-w-7xl mx-auto` agar tampilan halaman Beranda mengisi lebar penuh tanpa ruang kosong di samping kanan-kiri.
-- **`frontend/src/features/informasi/Informasi.jsx` [MODIFY]**: Menghapus batasan lebar maksimal `max-w-7xl mx-auto` agar tampilan halaman Informasi & Kegiatan mengisi lebar penuh tanpa ruang kosong di samping kanan-kiri.
+### 12. Fitur Filter RT - RW pada Halaman Data Warga (Baru)
+- **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian di sebelah bar pencarian utama, penyaringan tabel warga secara real-time sesuai RT terpilih, dan pembaruan statistik ringkasan (Total KK, Total Jiwa, Pemilik, Penyewa) secara otomatis.
 
 ---
 
@@ -138,3 +139,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 10. **Informasi & Kegiatan Layout Verification**:
     - Menavigasi ke menu "Informasi Kegiatan".
     - Memverifikasi bahwa tata letak halaman Informasi & Kegiatan mengisi lebar penuh tanpa ruang kosong di sisi kanan-kiri.
+11. **Filter RT - RW Halaman Data Warga Verification**:
+    - Menavigasi ke menu "Data Warga".
+    - Mengklik dropdown "RT/RW" di sebelah pencarian dan memilih nomor RT tertentu (misal: "RT 001").
+    - Memverifikasi tabel warga dan 4 kartu statistik (Total KK, Total Jiwa, Pemilik, Penyewa) langsung tersaring menyajikan data warga dari RT terpilih.

@@ -153,6 +153,12 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 ### I. Penyesuaian Lebar Penuh Halaman Informasi & Kegiatan (Baru)
 1. **Halaman Informasi & Kegiatan**: Saat menavigasi ke menu "Informasi Kegiatan", tata letak daftar pengumuman melebar memenuhi lebar layar tanpa menyisakan ruang kosong besar di sisi kanan dan kiri.
 
+### J. Fitur Filter RT - RW pada Halaman Data Warga (Baru)
+1. **Navigasi**: Pengguna menavigasi ke menu "Data Warga".
+2. **Pencarian & Filter RT**: Pengguna dapat memasukkan kata kunci pada bar pencarian atau mengklik dropdown "RT/RW" di sebelahnya.
+3. **Pencarian dalam Dropdown RT**: Dropdown menyediakan input pencarian untuk menemukan nomor RT secara cepat.
+4. **Pembaruan Real-Time**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), tabel warga dan 4 kartu statistik (Total KK, Total Jiwa, Pemilik, Penyewa) langsung tersaring menampilkan data warga RT terpilih.
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi
