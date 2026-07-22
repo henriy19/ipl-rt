@@ -100,6 +100,10 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`backend/src/models/reportModel.js` & `backend/src/controllers/reportController.js` [MODIFY]**: Dukungan parameter `rt_id` pada query SQL laporan rekapitulasi untuk memfilter pemasukan bulanan dan daftar tunggakan per RT.
 - **`frontend/src/features/laporan/Laporan.jsx` [MODIFY]**: Penambahan dropdown filter RT pada tab Laporan Keuangan yang secara otomatis meng-update angka Pemasukan Kas Lunas, Total Tunggakan Aktif, Rekap Bulanan, dan Tabel Tagihan per RT.
 
+### 14. Fitur Filter RT pada Halaman Transaksi Iuran (Baru)
+- **`backend/src/models/tagihanModel.js` & `backend/src/controllers/tagihanController.js` [MODIFY]**: Penambahan filter `rt_id` pada query `Tagihan.getAll` untuk memfilter daftar tagihan warga per RT.
+- **`frontend/src/features/transaksi/Transaksi.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian pada baris filter transaksi, penyaringan daftar tagihan bulanan secara real-time, dan pembaruan kartu statistik ringkasan (Total Tagihan, Lunas, Belum Lunas) sesuai RT terpilih.
+
 ---
 
 ## Verification Plan
@@ -151,3 +155,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
     - Menavigasi ke menu "Laporan" -> tab "Laporan Keuangan".
     - Mengubah dropdown "Filter RT" dan memilih salah satu RT (misal: "RT 001").
     - Memverifikasi Pemasukan Kas Lunas, Total Tunggakan, Rekap Bulanan, dan Tabel Tagihan langsung tersaring menyajikan data keuangan dari RT terpilih.
+13. **Filter RT Halaman Transaksi Iuran Verification**:
+    - Menavigasi ke menu "Transaksi".
+    - Mengklik dropdown "RT/RW" di baris filter dan memilih nomor RT tertentu (misal: "RT 001").
+    - Memverifikasi tabel tagihan dan 3 kartu statistik (Total Tagihan, Lunas, Belum Lunas) langsung tersaring menyajikan tagihan dari RT terpilih.

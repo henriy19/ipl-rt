@@ -164,6 +164,11 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 2. **Filter Bar**: Di samping filter Tahun dan Bulan Tunggakan, terdapat dropdown "Filter RT".
 3. **Pemberlakuan Query Database**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), sistem secara otomatis mengambil ulang data dari PostgreSQL untuk menyajikan angka Pemasukan Kas Lunas, Total Tunggakan Aktif, Rekap Pemasukan Bulanan, dan Daftar Tagihan khusus untuk RT terpilih.
 
+### L. Fitur Filter RT pada Halaman Transaksi Iuran (Baru)
+1. **Navigasi**: Pengguna menavigasi ke menu "Transaksi".
+2. **Filter Bar**: Di samping filter Bulan, Tahun, dan Status, terdapat dropdown "Filter RT".
+3. **Pemberlakuan Query Database**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), sistem secara otomatis mengambil ulang data dari PostgreSQL untuk menyajikan 3 kartu statistik (Total Tagihan Periode Ini, Lunas, Belum Lunas) dan tabel tagihan warga khusus untuk RT terpilih.
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi

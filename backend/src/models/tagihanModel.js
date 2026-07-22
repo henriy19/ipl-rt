@@ -19,6 +19,7 @@ const Tagihan = {
                 u.blok_rumah, 
                 u.nomor_rumah, 
                 u.no_hp,
+                u.rt_id,
                 rt.nomor_rt,
                 rw.nomor_rw,
                 mi.nama_iuran,
@@ -58,6 +59,10 @@ const Tagihan = {
         if (filters.user_id !== undefined && filters.user_id !== '') {
             params.push(filters.user_id);
             conditions.push(`t.user_id = $${params.length}`);
+        }
+        if (filters.rt_id !== undefined && filters.rt_id !== '' && filters.rt_id !== null) {
+            params.push(filters.rt_id);
+            conditions.push(`u.rt_id = $${params.length}`);
         }
 
         if (conditions.length > 0) {

@@ -26,6 +26,10 @@ const Transaksi = () => {
     const [filterBulan, setFilterBulan] = useState(now.getMonth() + 1);
     const [filterTahun, setFilterTahun] = useState(now.getFullYear());
     const [filterStatus, setFilterStatus] = useState('all');
+    const [filterRt, setFilterRt] = useState('');
+    const [isRtFilterOpen, setIsRtFilterOpen] = useState(false);
+    const [rtSearchTerm, setRtSearchTerm] = useState('');
+    const [rtList, setRtList] = useState([]);
 
     // List & Loading States
     const [transactions, setTransactions] = useState([]);
@@ -69,7 +73,25 @@ const Transaksi = () => {
 
     useEffect(() => {
         fetchTransactions();
-    }, [filterBulan, filterTahun, filterStatus]);
+        fetchRtList();
+    }, [filterBulan, filterTahun, filterStatus, filterRt]);
+
+    const fetchRtList = async () => {
+        try {
+            const res = await api.get('/rt');
+            if (res.data && res.data.status === 'success') {
+                setRtList(res.data.data);
+            }
+        } catch (err) {
+            console.error('Gagal mengambil data RT:', err);
+        }
+    };
+
+    const handleSelectRtFilter = (rtId) => {
+        setFilterRt(rtId);
+        setIsRtFilterOpen(false);
+        setRtSearchTerm('');
+    };
 
     const fetchTransactions = async () => {
         try {
@@ -82,7 +104,8 @@ const Transaksi = () => {
                 const params = {
                     bulan: filterBulan,
                     tahun: filterTahun,
-                    status: filterStatus
+                    status: filterStatus,
+                    rt_id: filterRt
                 };
                 res = await api.get('/tagihan', { params });
             } else {
@@ -103,7 +126,7 @@ const Transaksi = () => {
         }
     };
 
-    // Filter data lokal berdasarkan input pencarian (nama, blok, dll.)
+    // Filter data lokal berdasarkan input pencarian & RT
     const filteredTransactions = transactions.filter((t) => {
         const query = searchTerm.toLowerCase();
         // Tagihan history warga biasa mungkin tidak memiliki field nama_lengkap (karena milik sendiri)
@@ -112,12 +135,16 @@ const Transaksi = () => {
         const noRumah = t.nomor_rumah ? t.nomor_rumah.toLowerCase() : '';
         const namaIuran = t.nama_iuran ? t.nama_iuran.toLowerCase() : '';
         
-        return (
+        const matchesSearch = (
             nama.includes(query) ||
             blok.includes(query) ||
             noRumah.includes(query) ||
             namaIuran.includes(query)
         );
+
+        const matchesRt = !filterRt || t.rt_id === filterRt;
+
+        return matchesSearch && matchesRt;
     });
 
     // Generate Tagihan Bulanan (Massal)
@@ -385,7 +412,7 @@ const Transaksi = () => {
                         </div>
                         <div>
                             <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Tagihan Periode Ini</p>
-                            <p className="text-2xl font-bold text-emerald-950 mt-0.5">{transactions.length} Tagihan</p>
+                            <p className="text-2xl font-bold text-emerald-950 mt-0.5">{filteredTransactions.length} Tagihan</p>
                         </div>
                     </div>
 
@@ -396,7 +423,7 @@ const Transaksi = () => {
                         <div>
                             <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Lunas</p>
                             <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                                {transactions.filter(t => t.status === 'paid').length} Lunas
+                                {filteredTransactions.filter(t => t.status === 'paid').length} Lunas
                             </p>
                         </div>
                     </div>
@@ -408,7 +435,7 @@ const Transaksi = () => {
                         <div>
                             <p className="text-xs font-semibold text-rose-500 uppercase tracking-wider">Belum Lunas (Tunggakan)</p>
                             <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                                {transactions.filter(t => t.status !== 'paid').length} Rumah
+                                {filteredTransactions.filter(t => t.status !== 'paid').length} Rumah
                             </p>
                         </div>
                     </div>
@@ -559,6 +586,77 @@ const Transaksi = () => {
                                                         </div>
                                                     );
                                                 })}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* RT / RW Filter */}
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsRtFilterOpen(!isRtFilterOpen);
+                                        setIsBulanFilterOpen(false);
+                                        setIsTahunFilterOpen(false);
+                                        setIsStatusFilterOpen(false);
+                                    }}
+                                    className="px-3 py-1.5 border border-emerald-100 rounded-xl bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm text-emerald-950 font-semibold flex items-center justify-between min-w-[140px] cursor-pointer"
+                                >
+                                    <span>
+                                        {filterRt 
+                                            ? `RT ${rtList.find(r => r.id === filterRt)?.nomor_rt || ''} / RW ${rtList.find(r => r.id === filterRt)?.nomor_rw || ''}` 
+                                            : 'Semua RT'}
+                                    </span>
+                                    <svg className="ml-2 h-4 w-4 text-emerald-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                    </svg>
+                                </button>
+
+                                {isRtFilterOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-10" onClick={() => setIsRtFilterOpen(false)}></div>
+                                        <div className="absolute z-20 mt-1.5 w-56 bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in right-0 sm:left-0">
+                                            <div className="p-2 border-b border-emerald-50">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Cari RT..."
+                                                    value={rtSearchTerm}
+                                                    onChange={(e) => setRtSearchTerm(e.target.value)}
+                                                    className="w-full px-3 py-1.5 border border-emerald-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                                />
+                                            </div>
+                                            <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                                <div
+                                                    onClick={() => handleSelectRtFilter('')}
+                                                    className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                        filterRt === '' ? 'bg-emerald-50/50 font-bold' : ''
+                                                    }`}
+                                                >
+                                                    <span>Semua RT</span>
+                                                    {filterRt === '' && <CheckCircle size={12} className="text-emerald-600" />}
+                                                </div>
+                                                {rtList
+                                                    .filter(rt => {
+                                                        const q = rtSearchTerm.toLowerCase();
+                                                        return rt.nomor_rt.includes(q) || rt.nomor_rw.includes(q);
+                                                    })
+                                                    .map((rt) => {
+                                                        const isSelected = rt.id === filterRt;
+                                                        return (
+                                                            <div
+                                                                key={rt.id}
+                                                                onClick={() => handleSelectRtFilter(rt.id)}
+                                                                className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                                    isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                                }`}
+                                                            >
+                                                                <span>RT {rt.nomor_rt} / RW {rt.nomor_rw}</span>
+                                                                {isSelected && <CheckCircle size={12} className="text-emerald-600" />}
+                                                            </div>
+                                                        );
+                                                    })}
                                             </div>
                                         </div>
                                     </>

@@ -37,8 +37,8 @@ const GenerateTagihan = async (req, res, next) => {
 
 const GetAllTagihan = async (req, res, next) => {
     try {
-        const { bulan, tahun, status, user_id } = req.query;
-        const filters = { bulan, tahun, status, user_id };
+        const { bulan, tahun, status, user_id, rt_id } = req.query;
+        const filters = { bulan, tahun, status, user_id, rt_id };
 
         const tagihan = await Tagihan.getAll(filters);
         return res.success('Berhasil mengambil semua data tagihan', tagihan);
