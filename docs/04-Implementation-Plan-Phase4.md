@@ -172,7 +172,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
     - Menavigasi ke menu "Master Struktur".
     - Mengklik dropdown "RT/RW" di baris filter dan memilih nomor RT tertentu (misal: "RT 001").
     - Memverifikasi tabel pengurus dan 3 kartu statistik (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) langsung tersaring menyajikan data dari RT terpilih.
-15. **Tanggal Lahir & Detail Penghuni Warga Verification**:
+15. **Tanggal Lahir, No. HP, & Detail Penghuni Warga Verification**:
     - Menavigasi ke menu "Data Warga".
-    - Mengisi form tambah/edit warga dengan Tanggal Lahir dan menambah baris anggota penghuni rumah.
-    - Memverifikasi bahwa `jumlah_penghuni` dihitung otomatis dari total detail penghuni (warga utama + anggota tambahan) dan tersinkronisasi ke tabel `users_penghuni` dan modal profil warga.
+    - Mengisi form tambah/edit warga dengan Tanggal Lahir (Warga Utama) dan menambah baris anggota penghuni rumah (Nama Anggota, No. HP opsional, & Tanggal Lahir).
+    - Memverifikasi bahwa format tanggal disanitasi secara otomatis (`YYYY-MM-DD`, mencegah format tahun 6-digit `201988`), `no_hp_penghuni` tersimpan dengan benar di PostgreSQL, dan `jumlah_penghuni` dihitung otomatis dari total detail penghuni (warga utama + anggota tambahan) serta tersinkronisasi ke tabel `users_penghuni` dan modal profil warga.
