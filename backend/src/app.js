@@ -23,8 +23,10 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 app.use(responseFormatter);
 
+const fs = require('fs');
+
 // Basic route for health check
-app.get('/', (req, res) => {
+app.get('/api-health', (req, res) => {
     res.json({ message: 'Welcome to IPL RT API' });
 });
 
@@ -40,6 +42,19 @@ app.use('/api/informasi', informasiRoutes);
 app.use('/api/tagihan', tagihanRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+// Serve static frontend build files if dist exists
+const distPath = path.join(__dirname, '../../frontend/dist');
+if (fs.existsSync(distPath)) {
+    console.log(`Serving static frontend build from: ${distPath}`);
+    app.use(express.static(distPath));
+    app.get('*', (req, res, next) => {
+        if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+            return next();
+        }
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
 
 // Error handling middleware
 app.use(errorHandler);

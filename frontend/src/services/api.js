@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const rawUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const rawUrl = import.meta.env.VITE_API_URL || '';
 const cleanUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl;
 
 const api = axios.create({
-    baseURL: `${cleanUrl}/api`,
+    baseURL: cleanUrl ? `${cleanUrl}/api` : '/api',
 });
 
 // Interceptor untuk menyematkan JWT Token pada setiap request
