@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const XLSX = require('xlsx');
 const User = require('../models/userModel');
+const Penghuni = require('../models/penghuniModel');
 
 const GetAllWarga = async (req, res, next) => {
     try {
@@ -36,7 +37,8 @@ const CreateWarga = async (req, res, next) => {
             nomor_rumah, 
             status_hunian, 
             rt_id, 
-            jumlah_penghuni,
+            tanggal_lahir,
+            penghuni_list,
             is_active 
         } = req.body;
 
@@ -61,6 +63,9 @@ const CreateWarga = async (req, res, next) => {
         const rawPassword = password || 'password123';
         const password_hash = await bcrypt.hash(rawPassword, 10);
 
+        const additionalPenghuni = Array.isArray(penghuni_list) ? penghuni_list : [];
+        const initialCount = 1 + additionalPenghuni.filter(p => p && p.nama_lengkap && p.nama_lengkap.trim() !== '').length;
+
         const userData = {
             id,
             role_id: finalRoleId,
@@ -71,13 +76,17 @@ const CreateWarga = async (req, res, next) => {
             nomor_rumah,
             status_hunian,
             rt_id,
-            jumlah_penghuni: jumlah_penghuni !== undefined ? parseInt(jumlah_penghuni, 10) : 1,
+            jumlah_penghuni: initialCount,
+            tanggal_lahir: tanggal_lahir || null,
             is_active
         };
 
         await User.create(userData);
 
-        // Ambil data warga yang baru dibuat (tanpa password_hash)
+        // Sync detail penghuni di tabel users_penghuni
+        await Penghuni.syncPenghuni(no_hp, { nama_lengkap, tanggal_lahir }, additionalPenghuni);
+
+        // Ambil data warga yang baru dibuat (dengan detail penghuni)
         const createdWarga = await User.getById(id);
 
         return res.success('Warga berhasil ditambahkan', createdWarga, 201);
@@ -97,7 +106,8 @@ const UpdateWarga = async (req, res, next) => {
             nomor_rumah, 
             status_hunian, 
             rt_id, 
-            jumlah_penghuni,
+            tanggal_lahir,
+            penghuni_list,
             is_active 
         } = req.body;
 
@@ -120,6 +130,9 @@ const UpdateWarga = async (req, res, next) => {
             }
         }
 
+        const additionalPenghuni = Array.isArray(penghuni_list) ? penghuni_list : (existingWarga.penghuni_list || []);
+        const computedCount = 1 + additionalPenghuni.filter(p => p && p.nama_lengkap && p.nama_lengkap.trim() !== '').length;
+
         const userData = {
             role_id: role_id || existingWarga.role_id,
             nama_lengkap,
@@ -128,11 +141,15 @@ const UpdateWarga = async (req, res, next) => {
             nomor_rumah,
             status_hunian: status_hunian || existingWarga.status_hunian,
             rt_id,
-            jumlah_penghuni: jumlah_penghuni !== undefined ? parseInt(jumlah_penghuni, 10) : existingWarga.jumlah_penghuni,
+            jumlah_penghuni: computedCount,
+            tanggal_lahir: tanggal_lahir || existingWarga.tanggal_lahir || null,
             is_active: is_active !== undefined ? is_active : existingWarga.is_active
         };
 
         await User.update(id, userData);
+
+        // Sync detail penghuni di tabel users_penghuni
+        await Penghuni.syncPenghuni(no_hp, { nama_lengkap, tanggal_lahir }, additionalPenghuni);
 
         // Ambil data warga setelah diperbarui
         const updatedWarga = await User.getById(id);
@@ -215,13 +232,13 @@ const UploadExcelWarga = async (req, res, next) => {
             const no_hp = String(row['No HP'] || row['no_hp'] || row['Nomor HP'] || row['no_handphone'] || '').trim();
             const blok_rumah = row['Blok'] || row['blok'] || row['Blok Rumah'] || row['blok_rumah'];
             const nomor_rumah = String(row['No Rumah'] || row['no_rumah'] || row['Nomor Rumah'] || row['nomor_rumah'] || '').trim();
-            
+            const tanggal_lahir = row['Tanggal Lahir'] || row['tanggal_lahir'] || row['Tgl Lahir'] || null;
+
             let status_hunian = String(row['Status Hunian'] || row['status_hunian'] || row['Status'] || row['status'] || 'pemilik').toLowerCase().trim();
             if (status_hunian !== 'pemilik' && status_hunian !== 'penyewa') {
                 status_hunian = 'pemilik';
             }
 
-            const jumlah_penghuni = parseInt(row['Jumlah Penghuni'] || row['jumlah_penghuni'] || row['Penghuni'] || 1, 10) || 1;
             const roleName = String(row['Peran'] || row['peran'] || row['Role'] || row['role'] || 'warga').toLowerCase().trim();
             const role_id = roleMap[roleName] || defaultRoleId;
 
@@ -250,8 +267,8 @@ const UploadExcelWarga = async (req, res, next) => {
                 INSERT INTO users (
                     id, role_id, nama_lengkap, no_hp, password_hash, 
                     blok_rumah, nomor_rumah, status_hunian, rt_id, 
-                    jumlah_penghuni, is_active
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                    jumlah_penghuni, tanggal_lahir, is_active
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 1, $10, true)
                 ON CONFLICT (no_hp) DO UPDATE SET
                     role_id = EXCLUDED.role_id,
                     nama_lengkap = EXCLUDED.nama_lengkap,
@@ -259,7 +276,7 @@ const UploadExcelWarga = async (req, res, next) => {
                     nomor_rumah = EXCLUDED.nomor_rumah,
                     status_hunian = EXCLUDED.status_hunian,
                     rt_id = EXCLUDED.rt_id,
-                    jumlah_penghuni = EXCLUDED.jumlah_penghuni,
+                    tanggal_lahir = EXCLUDED.tanggal_lahir,
                     is_active = EXCLUDED.is_active,
                     updated_at = CURRENT_TIMESTAMP
             `;
@@ -274,11 +291,14 @@ const UploadExcelWarga = async (req, res, next) => {
                 nomor_rumah || null,
                 status_hunian,
                 rt_id,
-                jumlah_penghuni,
-                true
+                tanggal_lahir || null
             ];
 
             await pool.query(query, params);
+
+            // Sync main user entry into users_penghuni
+            await Penghuni.syncPenghuni(no_hp, { nama_lengkap, tanggal_lahir }, [], pool);
+
             upsertedCount++;
         }
 

@@ -58,9 +58,49 @@ const Warga = () => {
         status_hunian: 'pemilik',
         rt_id: '',
         role_id: '',
-        jumlah_penghuni: 1,
+        tanggal_lahir: '',
+        penghuni_list: [],
         is_active: 1
     });
+
+    const handleAddPenghuniRow = () => {
+        setFormData(prev => ({
+            ...prev,
+            penghuni_list: [
+                ...prev.penghuni_list,
+                { nama_lengkap: '', tanggal_lahir: '' }
+            ]
+        }));
+    };
+
+    const handleRemovePenghuniRow = (index) => {
+        setFormData(prev => ({
+            ...prev,
+            penghuni_list: prev.penghuni_list.filter((_, i) => i !== index)
+        }));
+    };
+
+    const sanitizeDate = (val) => {
+        if (!val) return '';
+        const parts = String(val).split('-');
+        if (parts.length === 3) {
+            let [year, month, day] = parts;
+            if (year.length > 4) {
+                year = year.slice(0, 4);
+                return `${year}-${month}-${day}`;
+            }
+        }
+        return val;
+    };
+
+    const handlePenghuniChange = (index, field, value) => {
+        const finalValue = field === 'tanggal_lahir' ? sanitizeDate(value) : value;
+        setFormData(prev => {
+            const updated = [...prev.penghuni_list];
+            updated[index] = { ...updated[index], [field]: finalValue };
+            return { ...prev, penghuni_list: updated };
+        });
+    };
 
     // Custom Dropdown States for RT / RW
     const [isRtDropdownOpen, setIsRtDropdownOpen] = useState(false);
@@ -124,9 +164,10 @@ const Warga = () => {
     // Form Change Handler
     const handleInputChange = (e) => {
         const { name, value } = e.target;
+        const finalValue = name === 'tanggal_lahir' ? sanitizeDate(value) : value;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: finalValue
         }));
     };
 
@@ -181,7 +222,8 @@ const Warga = () => {
             status_hunian: 'pemilik',
             rt_id: rtList[0]?.id || '',
             role_id: roleList.find(r => r.nama_role.toLowerCase() === 'warga')?.id || roleList[0]?.id || '',
-            jumlah_penghuni: 1,
+            tanggal_lahir: '',
+            penghuni_list: [],
             is_active: 1
         });
         setFormError('');
@@ -194,6 +236,14 @@ const Warga = () => {
 
     const openEditModal = (warga) => {
         setSelectedWarga(warga);
+        const additionalPenghuni = (warga.penghuni_list || [])
+            .filter(p => p.nama_lengkap.trim().toLowerCase() !== warga.nama_lengkap.trim().toLowerCase())
+            .map(p => ({
+                id: p.id,
+                nama_lengkap: p.nama_lengkap,
+                tanggal_lahir: p.tanggal_lahir || ''
+            }));
+
         setFormData({
             nama_lengkap: warga.nama_lengkap,
             no_hp: warga.no_hp,
@@ -203,7 +253,8 @@ const Warga = () => {
             status_hunian: warga.status_hunian || 'pemilik',
             rt_id: warga.rt_id || '',
             role_id: warga.role_id,
-            jumlah_penghuni: warga.jumlah_penghuni || 1,
+            tanggal_lahir: warga.tanggal_lahir || '',
+            penghuni_list: additionalPenghuni,
             is_active: warga.is_active
         });
         setFormError('');
@@ -802,17 +853,29 @@ const Warga = () => {
                                 </div>
                             )}
 
-                            <div>
-                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nama Lengkap *</label>
-                                <input
-                                    type="text"
-                                    name="nama_lengkap"
-                                    value={formData.nama_lengkap}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
-                                    placeholder="Masukkan nama lengkap warga"
-                                    required
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nama Lengkap *</label>
+                                    <input
+                                        type="text"
+                                        name="nama_lengkap"
+                                        value={formData.nama_lengkap}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
+                                        placeholder="Masukkan nama lengkap warga"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Tanggal Lahir</label>
+                                    <input
+                                        type="date"
+                                        name="tanggal_lahir"
+                                        value={formData.tanggal_lahir || ''}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
+                                    />
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1035,18 +1098,69 @@ const Warga = () => {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-emerald-950 mb-1.5">Jumlah Penghuni (Jiwa)</label>
-                                <input
-                                    type="number"
-                                    name="jumlah_penghuni"
-                                    min="1"
-                                    value={formData.jumlah_penghuni}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
-                                    placeholder="Masukkan jumlah orang yang tinggal"
-                                    required
-                                />
+                            {/* Detail Penghuni Section */}
+                            <div className="border border-emerald-100 rounded-2xl p-4 bg-emerald-50/20 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                                        <Users size={16} className="text-emerald-600" />
+                                        Detail Penghuni / Anggota Keluarga
+                                    </label>
+                                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        Total: {1 + formData.penghuni_list.filter(p => p.nama_lengkap.trim()).length} Jiwa
+                                    </span>
+                                </div>
+                                <p className="text-xs text-emerald-600/80">
+                                    Warga utama otomatis dihitung sebagai penghuni 1. Tambahkan anggota keluarga yang tinggal di rumah yang sama.
+                                </p>
+
+                                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                    {/* Penghuni 1 (Warga Utama) */}
+                                    <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100 text-xs">
+                                        <span className="font-bold text-emerald-700 min-w-[70px]">Utama:</span>
+                                        <div className="flex-1 font-semibold text-emerald-950 truncate">
+                                            {formData.nama_lengkap || '(Nama Warga Utama)'}
+                                        </div>
+                                        <div className="text-emerald-600 font-medium">
+                                            {formData.tanggal_lahir ? `Lahir: ${formData.tanggal_lahir}` : 'Tgl Lahir: -'}
+                                        </div>
+                                    </div>
+
+                                    {/* Anggota Penghuni Tambahan */}
+                                    {formData.penghuni_list.map((p, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100">
+                                            <input
+                                                type="text"
+                                                placeholder={`Nama Anggota #${idx + 2}`}
+                                                value={p.nama_lengkap}
+                                                onChange={(e) => handlePenghuniChange(idx, 'nama_lengkap', e.target.value)}
+                                                className="flex-1 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                            />
+                                            <input
+                                                type="date"
+                                                value={p.tanggal_lahir || ''}
+                                                onChange={(e) => handlePenghuniChange(idx, 'tanggal_lahir', e.target.value)}
+                                                className="w-32 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemovePenghuniRow(idx)}
+                                                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                                title="Hapus Anggota"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleAddPenghuniRow}
+                                    className="w-full py-2 border border-dashed border-emerald-300 hover:border-emerald-500 bg-white hover:bg-emerald-50 text-emerald-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                >
+                                    <UserPlus size={14} />
+                                    <span>+ Tambah Anggota Penghuni</span>
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-2 pt-2">
@@ -1118,17 +1232,29 @@ const Warga = () => {
                                 </div>
                             )}
 
-                            <div>
-                                <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nama Lengkap *</label>
-                                <input
-                                    type="text"
-                                    name="nama_lengkap"
-                                    value={formData.nama_lengkap}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
-                                    placeholder="Masukkan nama lengkap warga"
-                                    required
-                                />
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Nama Lengkap *</label>
+                                    <input
+                                        type="text"
+                                        name="nama_lengkap"
+                                        value={formData.nama_lengkap}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
+                                        placeholder="Masukkan nama lengkap warga"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-emerald-900 uppercase tracking-wider mb-1">Tanggal Lahir</label>
+                                    <input
+                                        type="date"
+                                        name="tanggal_lahir"
+                                        value={formData.tanggal_lahir || ''}
+                                        onChange={handleInputChange}
+                                        className="block w-full px-3 py-2 border border-emerald-100 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-emerald-950"
+                                    />
+                                </div>
                             </div>
 
                             <div>
@@ -1338,18 +1464,69 @@ const Warga = () => {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-semibold text-emerald-950 mb-1.5">Jumlah Penghuni (Jiwa)</label>
-                                <input
-                                    type="number"
-                                    name="jumlah_penghuni"
-                                    min="1"
-                                    value={formData.jumlah_penghuni}
-                                    onChange={handleInputChange}
-                                    className="block w-full px-4 py-2.5 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
-                                    placeholder="Masukkan jumlah orang yang tinggal"
-                                    required
-                                />
+                            {/* Detail Penghuni Section */}
+                            <div className="border border-emerald-100 rounded-2xl p-4 bg-emerald-50/20 space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                                        <Users size={16} className="text-emerald-600" />
+                                        Detail Penghuni / Anggota Keluarga
+                                    </label>
+                                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        Total: {1 + formData.penghuni_list.filter(p => p.nama_lengkap.trim()).length} Jiwa
+                                    </span>
+                                </div>
+                                <p className="text-xs text-emerald-600/80">
+                                    Warga utama otomatis dihitung sebagai penghuni 1. Tambahkan anggota keluarga yang tinggal di rumah yang sama.
+                                </p>
+
+                                <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                    {/* Penghuni 1 (Warga Utama) */}
+                                    <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100 text-xs">
+                                        <span className="font-bold text-emerald-700 min-w-[70px]">Utama:</span>
+                                        <div className="flex-1 font-semibold text-emerald-950 truncate">
+                                            {formData.nama_lengkap || '(Nama Warga Utama)'}
+                                        </div>
+                                        <div className="text-emerald-600 font-medium">
+                                            {formData.tanggal_lahir ? `Lahir: ${formData.tanggal_lahir}` : 'Tgl Lahir: -'}
+                                        </div>
+                                    </div>
+
+                                    {/* Anggota Penghuni Tambahan */}
+                                    {formData.penghuni_list.map((p, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100">
+                                            <input
+                                                type="text"
+                                                placeholder={`Nama Anggota #${idx + 2}`}
+                                                value={p.nama_lengkap}
+                                                onChange={(e) => handlePenghuniChange(idx, 'nama_lengkap', e.target.value)}
+                                                className="flex-1 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                            />
+                                            <input
+                                                type="date"
+                                                value={p.tanggal_lahir || ''}
+                                                onChange={(e) => handlePenghuniChange(idx, 'tanggal_lahir', e.target.value)}
+                                                className="w-32 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemovePenghuniRow(idx)}
+                                                className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                                                title="Hapus Anggota"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleAddPenghuniRow}
+                                    className="w-full py-2 border border-dashed border-emerald-300 hover:border-emerald-500 bg-white hover:bg-emerald-50 text-emerald-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                                >
+                                    <UserPlus size={14} />
+                                    <span>+ Tambah Anggota Penghuni</span>
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-2 pt-2">
@@ -1434,6 +1611,10 @@ const Warga = () => {
                                     <p className="font-semibold text-emerald-950 mt-0.5">{selectedWarga.no_hp}</p>
                                 </div>
                                 <div>
+                                    <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Tanggal Lahir</p>
+                                    <p className="font-semibold text-emerald-950 mt-0.5">{selectedWarga.tanggal_lahir || '-'}</p>
+                                </div>
+                                <div>
                                     <p className="text-xs font-bold text-emerald-500 uppercase tracking-wider">Status Hunian</p>
                                     <p className="font-semibold text-emerald-950 mt-0.5 capitalize">{selectedWarga.status_hunian}</p>
                                 </div>
@@ -1483,6 +1664,41 @@ const Warga = () => {
                                         })}
                                     </p>
                                 </div>
+                            </div>
+
+                            {/* Sub-Table Detail Penghuni */}
+                            <div className="border-t border-emerald-100 pt-4 space-y-2">
+                                <p className="text-xs font-bold text-emerald-950 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Users size={14} className="text-emerald-600" />
+                                    Detail Penghuni Rumah ({selectedWarga.penghuni_list?.length || selectedWarga.jumlah_penghuni || 1} Jiwa)
+                                </p>
+                                {selectedWarga.penghuni_list && selectedWarga.penghuni_list.length > 0 ? (
+                                    <div className="bg-emerald-50/20 rounded-xl border border-emerald-100 overflow-hidden text-xs">
+                                        <table className="min-w-full divide-y divide-emerald-100">
+                                            <thead className="bg-emerald-100/50 text-emerald-900 font-bold">
+                                                <tr>
+                                                    <th className="px-3 py-2 text-left">No</th>
+                                                    <th className="px-3 py-2 text-left">Nama Penghuni</th>
+                                                    <th className="px-3 py-2 text-left">Tanggal Lahir</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-emerald-50 bg-white">
+                                                {selectedWarga.penghuni_list.map((p, idx) => (
+                                                    <tr key={p.id || idx}>
+                                                        <td className="px-3 py-2 font-semibold text-emerald-600">{idx + 1}</td>
+                                                        <td className="px-3 py-2 font-bold text-emerald-950">
+                                                            {p.nama_lengkap}
+                                                            {idx === 0 && <span className="ml-1 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-medium">(Warga Utama)</span>}
+                                                        </td>
+                                                        <td className="px-3 py-2 text-emerald-800">{p.tanggal_lahir || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-emerald-600 font-medium">1 Penghuni ({selectedWarga.nama_lengkap})</p>
+                                )}
                             </div>
 
                             {/* Footer */}

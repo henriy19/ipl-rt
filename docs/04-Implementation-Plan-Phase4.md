@@ -107,6 +107,12 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 ### 15. Fitur Filter RT pada Halaman Master Struktur Organisasi (Baru)
 - **`frontend/src/features/master/StrukturOrganisasi.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian pada baris filter utama, penyaringan daftar pengurus secara real-time, dan pembaruan kartu statistik ringkasan (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) sesuai RT terpilih.
 
+### 16. Input Tanggal Lahir & Relasi Detail Penghuni pada Data Warga (Baru)
+- **`backend/database/init.sql` [MODIFY]**: Penambahan kolom `tanggal_lahir DATE` pada tabel `users` dan pembuatan tabel relasi `users_penghuni` (`id`, `no_hp`, `nama_lengkap`, `tanggal_lahir`, `created_at`, `updated_at`) dengan foreign key `no_hp` ON DELETE CASCADE ON UPDATE CASCADE.
+- **`backend/src/models/penghuniModel.js` [NEW]**: Model pembantu untuk CRUD dan sinkronisasi otomatis anggota keluarga/penghuni rumah (`syncPenghuni`), kalkulasi otomatis `jumlah_penghuni`, serta sanitasi tanggal lahir (`parseValidDate`).
+- **`backend/src/models/userModel.js` & `backend/src/controllers/userController.js` [MODIFY]**: Integrasi proyeksi `tanggal_lahir` dan pemanggilan `Penghuni.syncPenghuni` pada handler `CreateWarga`, `UpdateWarga`, dan `UploadExcelWarga`.
+- **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan field input Tanggal Lahir pada Warga Utama, sub-form dinamis Detail Penghuni (tambah/hapus anggota keluarga), pembaruan otomatis `jumlah_penghuni`, sanitasi tanggal lahir, serta visualisasi sub-tabel detail penghuni pada Modal Profil Warga.
+
 ---
 
 ## Verification Plan
@@ -166,3 +172,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
     - Menavigasi ke menu "Master Struktur".
     - Mengklik dropdown "RT/RW" di baris filter dan memilih nomor RT tertentu (misal: "RT 001").
     - Memverifikasi tabel pengurus dan 3 kartu statistik (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) langsung tersaring menyajikan data dari RT terpilih.
+15. **Tanggal Lahir & Detail Penghuni Warga Verification**:
+    - Menavigasi ke menu "Data Warga".
+    - Mengisi form tambah/edit warga dengan Tanggal Lahir dan menambah baris anggota penghuni rumah.
+    - Memverifikasi bahwa `jumlah_penghuni` dihitung otomatis dari total detail penghuni (warga utama + anggota tambahan) dan tersinkronisasi ke tabel `users_penghuni` dan modal profil warga.

@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS users (
     status_hunian VARCHAR(20) CHECK (status_hunian IN ('pemilik', 'penyewa')),
     rt_id VARCHAR(36),
     jumlah_penghuni INT DEFAULT 1,
+    tanggal_lahir DATE,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -69,6 +70,18 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Ensure column exists for existing databases
 ALTER TABLE users ADD COLUMN IF NOT EXISTS jumlah_penghuni INT DEFAULT 1;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS tanggal_lahir DATE;
+
+-- 6b. Table: users_penghuni (Detail Penghuni / Anggota Keluarga)
+CREATE TABLE IF NOT EXISTS users_penghuni (
+    id VARCHAR(36) PRIMARY KEY,
+    no_hp VARCHAR(20) NOT NULL,
+    nama_lengkap VARCHAR(150) NOT NULL,
+    tanggal_lahir DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (no_hp) REFERENCES users(no_hp) ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 -- 7. Table: master_iuran
 CREATE TABLE IF NOT EXISTS master_iuran (
