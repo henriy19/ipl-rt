@@ -1,12 +1,25 @@
 const { Pool } = require('pg');
 
+const getSslConfig = () => {
+    if (process.env.DB_SSL === 'false') return false;
+    if (process.env.DB_SSL === 'true') return { rejectUnauthorized: false };
+    if (process.env.DATABASE_URL) {
+        if (process.env.DATABASE_URL.includes('localhost') || process.env.DATABASE_URL.includes('127.0.0.1')) {
+            return false;
+        }
+        if (process.env.DATABASE_URL.includes('sslmode=disable') || process.env.DATABASE_URL.includes('railway.internal')) {
+            return false;
+        }
+        return { rejectUnauthorized: false };
+    }
+    return false;
+};
+
 // Create the connection pool
 const pool = process.env.DATABASE_URL 
     ? new Pool({
         connectionString: process.env.DATABASE_URL,
-        ssl: process.env.DATABASE_URL.includes('railway.internal') 
-            ? false 
-            : { rejectUnauthorized: false }
+        ssl: getSslConfig()
     })
     : new Pool({
         host: process.env.DB_HOST || 'localhost',
@@ -24,7 +37,7 @@ pool.connect()
         client.release();
     })
     .catch(err => {
-        console.error('Error connecting to the database:', err);
+        console.error('Error connecting to the database:', err.message || err);
     });
 
 module.exports = pool;
