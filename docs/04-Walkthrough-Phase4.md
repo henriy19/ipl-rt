@@ -169,6 +169,11 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 2. **Filter Bar**: Di samping filter Bulan, Tahun, dan Status, terdapat dropdown "Filter RT".
 3. **Pemberlakuan Query Database**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), sistem secara otomatis mengambil ulang data dari PostgreSQL untuk menyajikan 3 kartu statistik (Total Tagihan Periode Ini, Lunas, Belum Lunas) dan tabel tagihan warga khusus untuk RT terpilih.
 
+### M. Fitur Filter RT pada Halaman Master Struktur Organisasi (Baru)
+1. **Navigasi**: Pengguna menavigasi ke menu "Master Struktur".
+2. **Filter Bar**: Di samping input pencarian utama, terdapat dropdown "Filter RT".
+3. **Pemberlakuan Filter & Pengkinian Statistik**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), sistem secara otomatis menyaring daftar pengurus di tabel dan meng-update 3 kartu statistik (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) khusus untuk RT terpilih.
+
 ---
 
 ## Cara Menjalankan Halaman Data Warga, Informasi, RT-RW, & Struktur Organisasi di Aplikasi

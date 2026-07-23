@@ -59,9 +59,20 @@ const StrukturOrganisasi = () => {
     const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
     const [roleSearchTerm, setRoleSearchTerm] = useState('');
 
-    // Custom Dropdown States for Pilih RT
+    // Custom Dropdown States for Pilih RT (Modal)
     const [isRtDropdownOpen, setIsRtDropdownOpen] = useState(false);
     const [rtSearchTerm, setRtSearchTerm] = useState('');
+
+    // Custom Dropdown States for Filter RT (Main List)
+    const [filterRt, setFilterRt] = useState('');
+    const [isFilterRtOpen, setIsFilterRtOpen] = useState(false);
+    const [filterRtSearchTerm, setFilterRtSearchTerm] = useState('');
+
+    const handleSelectRtFilter = (rtId) => {
+        setFilterRt(rtId);
+        setIsFilterRtOpen(false);
+        setFilterRtSearchTerm('');
+    };
 
     useEffect(() => {
         fetchData();
@@ -99,15 +110,17 @@ const StrukturOrganisasi = () => {
         }
     };
 
-    // Filter struktur berdasarkan pencarian
+    // Filter struktur berdasarkan pencarian dan RT
     const filteredStruktur = strukturList.filter((s) => {
         const query = searchTerm.toLowerCase();
-        return (
+        const matchesSearch = (
             s.nama_lengkap.toLowerCase().includes(query) ||
             s.no_hp.toLowerCase().includes(query) ||
             s.jabatan.toLowerCase().includes(query) ||
             (s.nomor_rt && s.nomor_rt.includes(query))
         );
+        const matchesRt = !filterRt || s.rt_id === filterRt;
+        return matchesSearch && matchesRt;
     });
 
     // Warga yang belum didaftarkan dalam pengurus
@@ -322,7 +335,7 @@ const StrukturOrganisasi = () => {
                     </div>
                     <div>
                         <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Total Pengurus</p>
-                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">{strukturList.length} Orang</p>
+                        <p className="text-2xl font-bold text-emerald-950 mt-0.5">{filteredStruktur.length} Orang</p>
                     </div>
                 </div>
 
@@ -333,7 +346,7 @@ const StrukturOrganisasi = () => {
                     <div>
                         <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Pengurus Aktif</p>
                         <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                            {strukturList.filter(s => s.is_active).length} Orang
+                            {filteredStruktur.filter(s => s.is_active).length} Orang
                         </p>
                     </div>
                 </div>
@@ -345,7 +358,7 @@ const StrukturOrganisasi = () => {
                     <div>
                         <p className="text-xs font-semibold text-emerald-500 uppercase tracking-wider">Warga Belum Masuk Struktur</p>
                         <p className="text-2xl font-bold text-emerald-950 mt-0.5">
-                            {availableWarga.length} Warga
+                            {availableWarga.filter(w => !filterRt || w.rt_id === filterRt).length} Warga
                         </p>
                     </div>
                 </div>
@@ -353,17 +366,86 @@ const StrukturOrganisasi = () => {
 
             {/* Search & Actions Bar */}
             <div className="bg-white p-4 rounded-2xl border border-emerald-50 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="relative w-full sm:max-w-xs">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-400">
-                        <Search size={18} />
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto flex-1">
+                    {/* Search Input */}
+                    <div className="relative w-full sm:max-w-xs">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-emerald-400">
+                            <Search size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="block w-full pl-10 pr-3 py-2 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
+                            placeholder="Cari nama, jabatan, atau RT..."
+                        />
                     </div>
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="block w-full pl-10 pr-3 py-2 border border-emerald-100 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-emerald-50/10 placeholder-emerald-300 text-emerald-900 transition-colors"
-                        placeholder="Cari nama, jabatan, atau RT..."
-                    />
+
+                    {/* Filter RT / RW Dropdown */}
+                    <div className="relative w-full sm:w-auto">
+                        <button
+                            type="button"
+                            onClick={() => setIsFilterRtOpen(!isFilterRtOpen)}
+                            className="w-full sm:w-auto px-3.5 py-2 border border-emerald-100 rounded-xl bg-white shadow-sm hover:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm text-emerald-950 font-semibold flex items-center justify-between min-w-[150px] cursor-pointer"
+                        >
+                            <span>
+                                {filterRt 
+                                    ? `RT ${rtList.find(r => r.id === filterRt)?.nomor_rt || ''} / RW ${rtList.find(r => r.id === filterRt)?.nomor_rw || ''}` 
+                                    : 'Semua RT'}
+                            </span>
+                            <svg className="ml-2 h-4 w-4 text-emerald-500 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                        </button>
+
+                        {isFilterRtOpen && (
+                            <>
+                                <div className="fixed inset-0 z-10" onClick={() => setIsFilterRtOpen(false)}></div>
+                                <div className="absolute z-20 mt-1.5 w-56 bg-white border border-emerald-100 rounded-2xl shadow-xl max-h-60 overflow-hidden flex flex-col animate-fade-in left-0">
+                                    <div className="p-2 border-b border-emerald-50">
+                                        <input
+                                            type="text"
+                                            placeholder="Cari RT..."
+                                            value={filterRtSearchTerm}
+                                            onChange={(e) => setFilterRtSearchTerm(e.target.value)}
+                                            className="w-full px-3 py-1.5 border border-emerald-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                                        />
+                                    </div>
+                                    <div className="overflow-y-auto max-h-48 divide-y divide-emerald-50/30">
+                                        <div
+                                            onClick={() => handleSelectRtFilter('')}
+                                            className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                filterRt === '' ? 'bg-emerald-50/50 font-bold' : ''
+                                            }`}
+                                        >
+                                            <span>Semua RT</span>
+                                            {filterRt === '' && <CheckCircle size={12} className="text-emerald-600" />}
+                                        </div>
+                                        {rtList
+                                            .filter(rt => {
+                                                const q = filterRtSearchTerm.toLowerCase();
+                                                return rt.nomor_rt.includes(q) || rt.nomor_rw.includes(q);
+                                            })
+                                            .map((rt) => {
+                                                const isSelected = rt.id === filterRt;
+                                                return (
+                                                    <div
+                                                        key={rt.id}
+                                                        onClick={() => handleSelectRtFilter(rt.id)}
+                                                        className={`px-4 py-2 text-xs text-emerald-950 hover:bg-emerald-50 cursor-pointer flex items-center justify-between transition-colors ${
+                                                            isSelected ? 'bg-emerald-50/50 font-bold' : ''
+                                                        }`}
+                                                    >
+                                                        <span>RT {rt.nomor_rt} / RW {rt.nomor_rw}</span>
+                                                        {isSelected && <CheckCircle size={12} className="text-emerald-600" />}
+                                                    </div>
+                                                );
+                                            })}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                     <button 

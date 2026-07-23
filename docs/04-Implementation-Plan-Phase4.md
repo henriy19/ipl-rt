@@ -104,6 +104,9 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`backend/src/models/tagihanModel.js` & `backend/src/controllers/tagihanController.js` [MODIFY]**: Penambahan filter `rt_id` pada query `Tagihan.getAll` untuk memfilter daftar tagihan warga per RT.
 - **`frontend/src/features/transaksi/Transaksi.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian pada baris filter transaksi, penyaringan daftar tagihan bulanan secara real-time, dan pembaruan kartu statistik ringkasan (Total Tagihan, Lunas, Belum Lunas) sesuai RT terpilih.
 
+### 15. Fitur Filter RT pada Halaman Master Struktur Organisasi (Baru)
+- **`frontend/src/features/master/StrukturOrganisasi.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian pada baris filter utama, penyaringan daftar pengurus secara real-time, dan pembaruan kartu statistik ringkasan (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) sesuai RT terpilih.
+
 ---
 
 ## Verification Plan
@@ -159,3 +162,7 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
     - Menavigasi ke menu "Transaksi".
     - Mengklik dropdown "RT/RW" di baris filter dan memilih nomor RT tertentu (misal: "RT 001").
     - Memverifikasi tabel tagihan dan 3 kartu statistik (Total Tagihan, Lunas, Belum Lunas) langsung tersaring menyajikan tagihan dari RT terpilih.
+14. **Filter RT Halaman Master Struktur Organisasi Verification**:
+    - Menavigasi ke menu "Master Struktur".
+    - Mengklik dropdown "RT/RW" di baris filter dan memilih nomor RT tertentu (misal: "RT 001").
+    - Memverifikasi tabel pengurus dan 3 kartu statistik (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) langsung tersaring menyajikan data dari RT terpilih.
