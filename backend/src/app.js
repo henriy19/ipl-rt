@@ -43,9 +43,17 @@ app.use('/api/tagihan', tagihanRoutes);
 app.use('/api/report', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Serve static frontend build files if dist exists
-const distPath = path.join(__dirname, '../../frontend/dist');
-if (fs.existsSync(distPath)) {
+// Serve static frontend build files if dist exists across possible deployment paths
+const possibleDistPaths = [
+    path.join(__dirname, '../../frontend/dist'),
+    path.join(__dirname, '../public/dist'),
+    path.join(process.cwd(), 'frontend/dist'),
+    path.join(process.cwd(), '../frontend/dist'),
+    path.join(process.cwd(), 'dist')
+];
+
+const distPath = possibleDistPaths.find(p => fs.existsSync(p));
+if (distPath) {
     console.log(`Serving static frontend build from: ${distPath}`);
     app.use(express.static(distPath));
     app.get('*', (req, res, next) => {
@@ -53,6 +61,10 @@ if (fs.existsSync(distPath)) {
             return next();
         }
         res.sendFile(path.join(distPath, 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.json({ message: 'IPL RT API Service is Running' });
     });
 }
 
