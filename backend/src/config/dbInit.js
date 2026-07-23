@@ -4,7 +4,7 @@ const pool = require('./db');
 
 async function initializeDatabase() {
     try {
-        console.log('Ensuring schema migrations (users_penghuni & tanggal_lahir)...');
+        console.log('Ensuring schema migrations (users_penghuni & tanggal_lahir & no_hp_penghuni)...');
         await pool.query(`
             ALTER TABLE users ADD COLUMN IF NOT EXISTS jumlah_penghuni INT DEFAULT 1;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS tanggal_lahir DATE;
@@ -12,12 +12,15 @@ async function initializeDatabase() {
             CREATE TABLE IF NOT EXISTS users_penghuni (
                 id VARCHAR(36) PRIMARY KEY,
                 no_hp VARCHAR(20) NOT NULL,
+                no_hp_penghuni VARCHAR(20),
                 nama_lengkap VARCHAR(150) NOT NULL,
                 tanggal_lahir DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (no_hp) REFERENCES users(no_hp) ON DELETE CASCADE ON UPDATE CASCADE
             );
+
+            ALTER TABLE users_penghuni ADD COLUMN IF NOT EXISTS no_hp_penghuni VARCHAR(20);
         `);
 
         const sqlPath = path.join(__dirname, '../../database/init.sql');

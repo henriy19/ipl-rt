@@ -41,7 +41,7 @@ const Penghuni = {
     async getByPhone(no_hp) {
         if (!no_hp) return [];
         const query = `
-            SELECT id, no_hp, nama_lengkap, TO_CHAR(tanggal_lahir, 'YYYY-MM-DD') AS tanggal_lahir, created_at, updated_at 
+            SELECT id, no_hp, COALESCE(no_hp_penghuni, no_hp) AS no_hp_penghuni, nama_lengkap, TO_CHAR(tanggal_lahir, 'YYYY-MM-DD') AS tanggal_lahir, created_at, updated_at 
             FROM users_penghuni 
             WHERE no_hp = $1 
             ORDER BY created_at ASC
@@ -54,7 +54,7 @@ const Penghuni = {
     async getByPhonesBulk(phoneList) {
         if (!phoneList || phoneList.length === 0) return {};
         const query = `
-            SELECT id, no_hp, nama_lengkap, TO_CHAR(tanggal_lahir, 'YYYY-MM-DD') AS tanggal_lahir 
+            SELECT id, no_hp, COALESCE(no_hp_penghuni, no_hp) AS no_hp_penghuni, nama_lengkap, TO_CHAR(tanggal_lahir, 'YYYY-MM-DD') AS tanggal_lahir 
             FROM users_penghuni 
             WHERE no_hp = ANY($1)
             ORDER BY created_at ASC
@@ -80,12 +80,13 @@ const Penghuni = {
         // 1. Insert Main User as first occupant
         const mainId = crypto.randomUUID();
         const mainQuery = `
-            INSERT INTO users_penghuni (id, no_hp, nama_lengkap, tanggal_lahir)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO users_penghuni (id, no_hp, no_hp_penghuni, nama_lengkap, tanggal_lahir)
+            VALUES ($1, $2, $3, $4, $5)
         `;
         await executor.query(mainQuery, [
             mainId,
             no_hp,
+            mainUserObj.no_hp || no_hp,
             mainUserObj.nama_lengkap,
             parseValidDate(mainUserObj.tanggal_lahir)
         ]);
@@ -100,9 +101,11 @@ const Penghuni = {
                         continue;
                     }
                     const pId = crypto.randomUUID();
+                    const pNoHp = p.no_hp_penghuni || p.no_hp || null;
                     await executor.query(mainQuery, [
                         pId,
                         no_hp,
+                        pNoHp ? pNoHp.trim() : null,
                         p.nama_lengkap.trim(),
                         parseValidDate(p.tanggal_lahir)
                     ]);

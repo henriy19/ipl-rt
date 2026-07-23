@@ -68,7 +68,7 @@ const Warga = () => {
             ...prev,
             penghuni_list: [
                 ...prev.penghuni_list,
-                { nama_lengkap: '', tanggal_lahir: '' }
+                { nama_lengkap: '', no_hp_penghuni: '', tanggal_lahir: '' }
             ]
         }));
     };
@@ -188,16 +188,16 @@ const Warga = () => {
     };
 
     // Filter RT / RW lists
-    const filteredRts = rtList.filter(rt => {
-        const q = rtSearchTerm.toLowerCase();
-        return rt.nomor_rt.includes(q) || rt.nomor_rw.includes(q) || (rt.ketua_rt && rt.ketua_rt.toLowerCase().includes(q));
-    });
+    const filteredRts = rtList.filter(rt => 
+        `rt ${rt.nomor_rt} rw ${rt.nomor_rw}`.toLowerCase().includes(rtSearchTerm.toLowerCase()) ||
+        rt.nomor_rt.includes(rtSearchTerm) ||
+        rt.nomor_rw.includes(rtSearchTerm)
+    );
 
     // Filter Role lists
-    const filteredRoles = roleList.filter(role => {
-        const q = roleSearchTerm.toLowerCase();
-        return role.nama_role.toLowerCase().includes(q);
-    });
+    const filteredRoles = roleList.filter(r => 
+        r.nama_role.toLowerCase().includes(roleSearchTerm.toLowerCase())
+    );
 
     const handleSelectRt = (rtId) => {
         setFormData(prev => ({ ...prev, rt_id: rtId }));
@@ -241,6 +241,7 @@ const Warga = () => {
             .map(p => ({
                 id: p.id,
                 nama_lengkap: p.nama_lengkap,
+                no_hp_penghuni: p.no_hp_penghuni || '',
                 tanggal_lahir: p.tanggal_lahir || ''
             }));
 
@@ -1115,31 +1116,41 @@ const Warga = () => {
 
                                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                                     {/* Penghuni 1 (Warga Utama) */}
-                                    <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100 text-xs">
-                                        <span className="font-bold text-emerald-700 min-w-[70px]">Utama:</span>
-                                        <div className="flex-1 font-semibold text-emerald-950 truncate">
+                                    <div className="flex flex-wrap items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100 text-xs">
+                                        <span className="font-bold text-emerald-700 min-w-[50px]">Utama:</span>
+                                        <div className="flex-1 font-semibold text-emerald-950 truncate min-w-[100px]">
                                             {formData.nama_lengkap || '(Nama Warga Utama)'}
                                         </div>
+                                        <div className="text-emerald-600 font-medium truncate">
+                                            {formData.no_hp ? `HP: ${formData.no_hp}` : 'HP: -'}
+                                        </div>
                                         <div className="text-emerald-600 font-medium">
-                                            {formData.tanggal_lahir ? `Lahir: ${formData.tanggal_lahir}` : 'Tgl Lahir: -'}
+                                            {formData.tanggal_lahir ? `Lahir: ${formData.tanggal_lahir}` : 'Lahir: -'}
                                         </div>
                                     </div>
 
                                     {/* Anggota Penghuni Tambahan */}
                                     {formData.penghuni_list.map((p, idx) => (
-                                        <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100">
+                                        <div key={idx} className="flex flex-wrap items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100">
                                             <input
                                                 type="text"
                                                 placeholder={`Nama Anggota #${idx + 2}`}
                                                 value={p.nama_lengkap}
                                                 onChange={(e) => handlePenghuniChange(idx, 'nama_lengkap', e.target.value)}
-                                                className="flex-1 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                                className="flex-1 min-w-[120px] px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                            />
+                                            <input
+                                                type="tel"
+                                                placeholder="No HP (Opsional)"
+                                                value={p.no_hp_penghuni || ''}
+                                                onChange={(e) => handlePenghuniChange(idx, 'no_hp_penghuni', e.target.value)}
+                                                className="w-28 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
                                             />
                                             <input
                                                 type="date"
                                                 value={p.tanggal_lahir || ''}
                                                 onChange={(e) => handlePenghuniChange(idx, 'tanggal_lahir', e.target.value)}
-                                                className="w-32 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                                className="w-28 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
                                             />
                                             <button
                                                 type="button"
@@ -1481,31 +1492,41 @@ const Warga = () => {
 
                                 <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                                     {/* Penghuni 1 (Warga Utama) */}
-                                    <div className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100 text-xs">
-                                        <span className="font-bold text-emerald-700 min-w-[70px]">Utama:</span>
-                                        <div className="flex-1 font-semibold text-emerald-950 truncate">
+                                    <div className="flex flex-wrap items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100 text-xs">
+                                        <span className="font-bold text-emerald-700 min-w-[50px]">Utama:</span>
+                                        <div className="flex-1 font-semibold text-emerald-950 truncate min-w-[100px]">
                                             {formData.nama_lengkap || '(Nama Warga Utama)'}
                                         </div>
+                                        <div className="text-emerald-600 font-medium truncate">
+                                            {formData.no_hp ? `HP: ${formData.no_hp}` : 'HP: -'}
+                                        </div>
                                         <div className="text-emerald-600 font-medium">
-                                            {formData.tanggal_lahir ? `Lahir: ${formData.tanggal_lahir}` : 'Tgl Lahir: -'}
+                                            {formData.tanggal_lahir ? `Lahir: ${formData.tanggal_lahir}` : 'Lahir: -'}
                                         </div>
                                     </div>
 
                                     {/* Anggota Penghuni Tambahan */}
                                     {formData.penghuni_list.map((p, idx) => (
-                                        <div key={idx} className="flex items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100">
+                                        <div key={idx} className="flex flex-wrap items-center gap-2 p-2 bg-white rounded-xl border border-emerald-100">
                                             <input
                                                 type="text"
                                                 placeholder={`Nama Anggota #${idx + 2}`}
                                                 value={p.nama_lengkap}
                                                 onChange={(e) => handlePenghuniChange(idx, 'nama_lengkap', e.target.value)}
-                                                className="flex-1 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                                className="flex-1 min-w-[120px] px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                            />
+                                            <input
+                                                type="tel"
+                                                placeholder="No HP (Opsional)"
+                                                value={p.no_hp_penghuni || ''}
+                                                onChange={(e) => handlePenghuniChange(idx, 'no_hp_penghuni', e.target.value)}
+                                                className="w-28 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
                                             />
                                             <input
                                                 type="date"
                                                 value={p.tanggal_lahir || ''}
                                                 onChange={(e) => handlePenghuniChange(idx, 'tanggal_lahir', e.target.value)}
-                                                className="w-32 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                                                className="w-28 px-2.5 py-1.5 border border-emerald-100 rounded-lg text-xs focus:ring-1 focus:ring-emerald-500 text-emerald-950"
                                             />
                                             <button
                                                 type="button"
@@ -1675,10 +1696,11 @@ const Warga = () => {
                                 {selectedWarga.penghuni_list && selectedWarga.penghuni_list.length > 0 ? (
                                     <div className="bg-emerald-50/20 rounded-xl border border-emerald-100 overflow-hidden text-xs">
                                         <table className="min-w-full divide-y divide-emerald-100">
-                                            <thead className="bg-emerald-100/50 text-emerald-900 font-bold">
+                                             <thead className="bg-emerald-100/50 text-emerald-900 font-bold">
                                                 <tr>
                                                     <th className="px-3 py-2 text-left">No</th>
                                                     <th className="px-3 py-2 text-left">Nama Penghuni</th>
+                                                    <th className="px-3 py-2 text-left">No. Handphone</th>
                                                     <th className="px-3 py-2 text-left">Tanggal Lahir</th>
                                                 </tr>
                                             </thead>
@@ -1690,6 +1712,7 @@ const Warga = () => {
                                                             {p.nama_lengkap}
                                                             {idx === 0 && <span className="ml-1 text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-full font-medium">(Warga Utama)</span>}
                                                         </td>
+                                                        <td className="px-3 py-2 text-emerald-800 font-medium">{p.no_hp_penghuni || p.no_hp || '-'}</td>
                                                         <td className="px-3 py-2 text-emerald-800">{p.tanggal_lahir || '-'}</td>
                                                     </tr>
                                                 ))}

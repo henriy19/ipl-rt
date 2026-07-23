@@ -76,12 +76,15 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS tanggal_lahir DATE;
 CREATE TABLE IF NOT EXISTS users_penghuni (
     id VARCHAR(36) PRIMARY KEY,
     no_hp VARCHAR(20) NOT NULL,
+    no_hp_penghuni VARCHAR(20),
     nama_lengkap VARCHAR(150) NOT NULL,
     tanggal_lahir DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (no_hp) REFERENCES users(no_hp) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+ALTER TABLE users_penghuni ADD COLUMN IF NOT EXISTS no_hp_penghuni VARCHAR(20);
 
 -- 7. Table: master_iuran
 CREATE TABLE IF NOT EXISTS master_iuran (

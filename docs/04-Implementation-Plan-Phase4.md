@@ -107,11 +107,11 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 ### 15. Fitur Filter RT pada Halaman Master Struktur Organisasi (Baru)
 - **`frontend/src/features/master/StrukturOrganisasi.jsx` [MODIFY]**: Penambahan dropdown filter RT/RW kustom dengan pencarian pada baris filter utama, penyaringan daftar pengurus secara real-time, dan pembaruan kartu statistik ringkasan (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) sesuai RT terpilih.
 
-### 16. Input Tanggal Lahir & Relasi Detail Penghuni pada Data Warga (Baru)
-- **`backend/database/init.sql` [MODIFY]**: Penambahan kolom `tanggal_lahir DATE` pada tabel `users` dan pembuatan tabel relasi `users_penghuni` (`id`, `no_hp`, `nama_lengkap`, `tanggal_lahir`, `created_at`, `updated_at`) dengan foreign key `no_hp` ON DELETE CASCADE ON UPDATE CASCADE.
-- **`backend/src/models/penghuniModel.js` [NEW]**: Model pembantu untuk CRUD dan sinkronisasi otomatis anggota keluarga/penghuni rumah (`syncPenghuni`), kalkulasi otomatis `jumlah_penghuni`, serta sanitasi tanggal lahir (`parseValidDate`).
-- **`backend/src/models/userModel.js` & `backend/src/controllers/userController.js` [MODIFY]**: Integrasi proyeksi `tanggal_lahir` dan pemanggilan `Penghuni.syncPenghuni` pada handler `CreateWarga`, `UpdateWarga`, dan `UploadExcelWarga`.
-- **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan field input Tanggal Lahir pada Warga Utama, sub-form dinamis Detail Penghuni (tambah/hapus anggota keluarga), pembaruan otomatis `jumlah_penghuni`, sanitasi tanggal lahir, serta visualisasi sub-tabel detail penghuni pada Modal Profil Warga.
+### 16. Input Tanggal Lahir, No. HP, & Relasi Detail Penghuni pada Data Warga (Baru)
+- **`backend/database/init.sql` & `backend/src/config/dbInit.js` [MODIFY]**: Penambahan kolom `tanggal_lahir DATE` pada tabel `users` serta pembuatan tabel relasi `users_penghuni` (`id`, `no_hp`, `no_hp_penghuni`, `nama_lengkap`, `tanggal_lahir`, `created_at`, `updated_at`) dengan foreign key `no_hp` ON DELETE CASCADE ON UPDATE CASCADE.
+- **`backend/src/models/penghuniModel.js` [NEW]**: Model pembantu untuk CRUD dan sinkronisasi otomatis anggota keluarga/penghuni rumah (`syncPenghuni`), penanganan kolom `no_hp_penghuni`, kalkulasi otomatis `jumlah_penghuni`, serta sanitasi tanggal lahir (`parseValidDate`).
+- **`backend/src/models/userModel.js` & `backend/src/controllers/userController.js` [MODIFY]**: Integrasi proyeksi `tanggal_lahir`, `no_hp_penghuni`, dan pemanggilan `Penghuni.syncPenghuni` pada handler `CreateWarga`, `UpdateWarga`, dan `UploadExcelWarga`.
+- **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan field input Tanggal Lahir pada Warga Utama, input No. HP opsional per anggota penghuni, sub-form dinamis Detail Penghuni (tambah/hapus anggota keluarga), pembaruan otomatis `jumlah_penghuni`, sanitasi tanggal lahir, serta visualisasi sub-tabel detail penghuni (termasuk kolom No. Handphone) pada Modal Profil Warga.
 
 ---
 

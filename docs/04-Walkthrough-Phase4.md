@@ -174,12 +174,12 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 2. **Filter Bar**: Di samping input pencarian utama, terdapat dropdown "Filter RT".
 3. **Pemberlakuan Filter & Pengkinian Statistik**: Saat nomor RT dipilih (misal: "RT 001 / RW 010"), sistem secara otomatis menyaring daftar pengurus di tabel dan meng-update 3 kartu statistik (Total Pengurus, Pengurus Aktif, Warga Belum Masuk Struktur) khusus untuk RT terpilih.
 
-### N. Input Tanggal Lahir & Relasi Detail Penghuni pada Data Warga (Baru)
+### N. Input Tanggal Lahir, No. HP, & Relasi Detail Penghuni pada Data Warga (Baru)
 1. **Input Tanggal Lahir Warga Utama**: Pada form Tambah / Edit Data Warga, admin dapat memasukkan informasi `Tanggal Lahir` untuk Warga Utama.
-2. **Sub-Form Dinamis Detail Penghuni**: Form menyediakan bagian "Detail Penghuni / Anggota Keluarga" di mana Warga Utama otomatis tercatat sebagai penghuni 1. Admin dapat mengklik "+ Tambah Anggota Penghuni" untuk menambah baris anggota keluarga (Nama Lengkap & Tanggal Lahir) atau mengklik ikon sampah untuk menghapus.
+2. **Sub-Form Dinamis Detail Penghuni & Input No. HP**: Form menyediakan bagian "Detail Penghuni / Anggota Keluarga" di mana Warga Utama otomatis tercatat sebagai penghuni 1 (beserta No. HP & Tgl Lahir). Admin dapat mengklik "+ Tambah Anggota Penghuni" untuk menambah baris anggota keluarga (Nama Lengkap, No. HP opsional, & Tanggal Lahir) atau mengklik ikon sampah untuk menghapus.
 3. **Kalkulasi Otomatis Jumlah Penghuni**: Nilai `jumlah_penghuni` tidak lagi diinput secara manual oleh user, tetapi dihitung otomatis oleh sistem dari total baris detail penghuni yang valid (1 Warga Utama + N Anggota Tambahan).
-4. **Tabel Relasi PostgreSQL (`users_penghuni`)**: Setiap data penghuni tersimpan otomatis ke tabel `users_penghuni` dengan foreign key `no_hp` ke tabel `users` (ON DELETE CASCADE ON UPDATE CASCADE).
-5. **Modal Detail Profil Warga**: Saat ikon Mata (View Detail) diklik, sistem menampilkan informasi Tanggal Lahir Warga Utama dan menyajikan sub-tabel lengkap berisi seluruh Anggota Penghuni Rumah.
+4. **Tabel Relasi PostgreSQL (`users_penghuni`)**: Setiap data penghuni tersimpan otomatis ke tabel `users_penghuni` (`id`, `no_hp`, `no_hp_penghuni`, `nama_lengkap`, `tanggal_lahir`) dengan foreign key `no_hp` ke tabel `users` (ON DELETE CASCADE ON UPDATE CASCADE).
+5. **Modal Detail Profil Warga**: Saat ikon Mata (View Detail) diklik, sistem menampilkan informasi Tanggal Lahir Warga Utama dan menyajikan sub-tabel lengkap berisi seluruh Anggota Penghuni Rumah (termasuk kolom No. Handphone).
 
 ---
 
