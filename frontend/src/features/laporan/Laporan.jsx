@@ -141,8 +141,8 @@ const Laporan = () => {
         // Buat baris tabel pemasukan
         const pemasukanRows = rekapData.rekap_pemasukan_bulanan.map(item => `
             <tr>
-                <td style="padding: 8px; border: 1px solid #ddd;">${getNamaBulan(item.bulan)}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold;">
+                <td style="padding: 10px 14px; border: 1px solid #e2e8f0; font-weight: 500; color: #334155;">${getNamaBulan(item.bulan)}</td>
+                <td style="padding: 10px 14px; border: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: #047857;">
                     ${formatRupiah(item.total)}
                 </td>
             </tr>
@@ -154,25 +154,26 @@ const Laporan = () => {
                 const statusText = t.status === 'paid' ? 'Lunas' : t.status === 'pending' ? 'Butuh Verifikasi' : 'Tunggakan';
                 const statusColor = t.status === 'paid' ? '#047857' : t.status === 'pending' ? '#b45309' : '#b91c1c';
                 const statusBg = t.status === 'paid' ? '#ecfdf5' : t.status === 'pending' ? '#fffbeb' : '#fef2f2';
+                const statusBorder = t.status === 'paid' ? '#a7f3d0' : t.status === 'pending' ? '#fde68a' : '#fecaca';
                 return `
                     <tr>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${t.nama_lengkap}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">Blok ${t.blok_rumah || '-'}/${t.nomor_rumah || '-'} (RT ${t.nomor_rt || '-'})</td>
-                        <td style="padding: 8px; border: 1px solid #ddd;">${t.nama_iuran}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${getNamaBulan(t.bulan)} ${t.tahun}</td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-                            <span style="display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; color: ${statusColor}; background-color: ${statusBg}; border: 1px solid ${statusColor}40;">
+                        <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center; color: #64748b; font-weight: 500;">${index + 1}</td>
+                        <td style="padding: 10px 14px; border: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${t.nama_lengkap}</td>
+                        <td style="padding: 10px 14px; border: 1px solid #e2e8f0; color: #334155;">Blok ${t.blok_rumah || '-'}/${t.nomor_rumah || '-'} (RT ${t.nomor_rt || '-'})</td>
+                        <td style="padding: 10px 14px; border: 1px solid #e2e8f0; color: #334155;">${t.nama_iuran}</td>
+                        <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center; color: #334155;">${getNamaBulan(t.bulan)} ${t.tahun}</td>
+                        <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center;">
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 10px; font-weight: 700; color: ${statusColor}; background-color: ${statusBg}; border: 1px solid ${statusBorder};">
                                 ${statusText}
                             </span>
                         </td>
-                        <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold; color: ${statusColor};">
+                        <td style="padding: 10px 14px; border: 1px solid #e2e8f0; text-align: right; font-weight: 700; color: ${statusColor};">
                             ${formatRupiah(t.nominal_tagihan)}
                         </td>
                     </tr>
                 `;
             }).join('')
-            : `<tr><td colspan="7" style="padding: 12px; border: 1px solid #ddd; text-align: center; color: #777;">Tidak ada data tagihan warga pada periode ini.</td></tr>`;
+            : `<tr><td colspan="7" style="padding: 16px; border: 1px solid #e2e8f0; text-align: center; color: #64748b;">Tidak ada data tagihan warga pada periode ini.</td></tr>`;
 
         const filename = `Laporan_Keuangan_RT_${rekapData.tahun}_${rekapData.bulan_filter === 'Semua' ? 'Tahunan' : getNamaBulan(rekapData.bulan_filter)}.pdf`;
 
@@ -181,7 +182,7 @@ const Laporan = () => {
         iframe.style.position = 'fixed';
         iframe.style.left = '0';
         iframe.style.top = '0';
-        iframe.style.width = '820px';
+        iframe.style.width = '840px';
         iframe.style.height = '1200px';
         iframe.style.zIndex = '-9999';
         iframe.style.border = 'none';
@@ -195,22 +196,22 @@ const Laporan = () => {
                 <head>
                     <title>${filename}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; color: #1a202c; padding: 30px; margin: 0; background: #ffffff; }
-                        .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 12px; margin-bottom: 25px; }
-                        .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; }
-                        .header p { margin: 4px 0 0 0; font-size: 13px; color: #4b5563; }
-                        .meta-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; }
-                        .summary-cards { display: flex; gap: 15px; margin-bottom: 25px; }
-                        .card { flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; background: #f8fafc; }
-                        .card-title { font-size: 11px; text-transform: uppercase; color: #718096; font-weight: bold; letter-spacing: 0.5px; }
-                        .card-value { font-size: 18px; font-weight: bold; color: #1a202c; margin-top: 5px; }
-                        .table-title { font-size: 15px; font-weight: bold; color: #065f46; border-left: 4px solid #10b981; padding-left: 8px; margin: 20px 0 10px 0; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 12px; }
-                        th { background-color: #f1f5f9; padding: 10px 8px; border: 1px solid #ddd; font-weight: bold; text-align: left; }
-                        td { padding: 8px; border: 1px solid #ddd; }
-                        .signature-section { display: flex; justify-content: space-between; margin-top: 40px; font-size: 12px; }
-                        .signature-box { text-align: center; width: 200px; }
-                        .signature-space { height: 60px; }
+                        body { font-family: Arial, sans-serif; color: #1e293b; padding: 40px 48px; margin: 0; background: #ffffff; line-height: 1.6; }
+                        .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 16px; margin-bottom: 28px; }
+                        .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
+                        .header p { margin: 6px 0 0 0; font-size: 13px; color: #4b5563; }
+                        .meta-info { display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 13px; color: #334155; background: #f8fafc; padding: 12px 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
+                        .summary-cards { display: flex; gap: 16px; margin-bottom: 28px; }
+                        .card { flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+                        .card-title { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; letter-spacing: 0.5px; }
+                        .card-value { font-size: 20px; font-weight: bold; color: #0f172a; margin-top: 6px; }
+                        .table-title { font-size: 15px; font-weight: bold; color: #065f46; border-left: 4px solid #10b981; padding-left: 10px; margin: 28px 0 14px 0; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
+                        th { background-color: #f1f5f9; padding: 12px 14px; border: 1px solid #cbd5e1; font-weight: bold; text-align: left; color: #1e293b; letter-spacing: 0.3px; }
+                        td { padding: 10px 14px; border: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
+                        .signature-section { display: flex; justify-content: space-between; margin-top: 50px; font-size: 13px; page-break-inside: avoid; }
+                        .signature-box { text-align: center; width: 220px; }
+                        .signature-space { height: 70px; }
                     </style>
                 </head>
                 <body>
@@ -270,15 +271,15 @@ const Laporan = () => {
                         <div class="signature-section">
                             <div class="signature-box">
                                 <p>Mengetahui,</p>
-                                <p><strong>Ketua RT 001</strong></p>
+                                <p style="font-weight: bold;">Ketua RT 001</p>
                                 <div class="signature-space"></div>
-                                <p>___________________</p>
+                                <p style="text-decoration: underline; font-weight: bold;">Bapak RT 01</p>
                             </div>
                             <div class="signature-box">
-                                <p>Dicetak Oleh,</p>
-                                <p><strong>Bendahara RT</strong></p>
+                                <p>Wargatify, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                                <p style="font-weight: bold;">Bendahara RT / Pengurus</p>
                                 <div class="signature-space"></div>
-                                <p><strong>${user?.nama_lengkap || 'Bendahara'}</strong></p>
+                                <p style="text-decoration: underline; font-weight: bold;">${user?.nama_lengkap || 'Bendahara'}</p>
                             </div>
                         </div>
                     </div>
@@ -287,7 +288,7 @@ const Laporan = () => {
         `);
         iframeDoc.close();
 
-        // Render PDF on loaded iframe window context
+        // Render PDF on loaded iframe window context with proper margins and scale
         setTimeout(() => {
             const printContent = iframeDoc.getElementById('print-content');
             html2canvas(printContent, {
@@ -296,24 +297,27 @@ const Laporan = () => {
                 backgroundColor: '#ffffff',
                 logging: false
             }).then((canvas) => {
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
                 
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
+                const marginX = 10;
+                const marginY = 10;
+                const printWidth = 190; // 210 - 20mm margin
                 const pageHeight = 297;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const printableHeight = pageHeight - (marginY * 2);
+                const imgHeight = (canvas.height * printWidth) / canvas.width;
                 
                 let heightLeft = imgHeight;
-                let position = 0;
+                let position = marginY;
 
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                pdf.addImage(imgData, 'JPEG', marginX, position, printWidth, imgHeight);
+                heightLeft -= printableHeight;
 
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight + marginY;
                     pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+                    pdf.addImage(imgData, 'JPEG', marginX, position, printWidth, imgHeight);
+                    heightLeft -= printableHeight;
                 }
 
                 pdf.save(filename);
@@ -344,14 +348,14 @@ const Laporan = () => {
 
         const wargaRows = filteredWarga.map((w, index) => `
             <tr>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${w.nama_lengkap}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${w.no_hp}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">Blok ${w.blok_rumah || '-'}/${w.nomor_rumah || '-'} (RT ${w.nomor_rt || '-'})</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center; text-transform: capitalize;">${w.status_hunian}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${w.jumlah_penghuni || 1} Jiwa</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-                    <span style="color: ${w.is_active ? '#047857' : '#b91c1c'}; font-weight: bold;">
+                <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center; color: #64748b; font-weight: 500;">${index + 1}</td>
+                <td style="padding: 10px 14px; border: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">${w.nama_lengkap}</td>
+                <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center; color: #334155;">${w.no_hp || '-'}</td>
+                <td style="padding: 10px 14px; border: 1px solid #e2e8f0; color: #334155;">Blok ${w.blok_rumah || '-'}/${w.nomor_rumah || '-'} (RT ${w.nomor_rt || '-'})</td>
+                <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center; text-transform: capitalize; color: #334155;">${w.status_hunian}</td>
+                <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #065f46;">${w.jumlah_penghuni || 1} Jiwa</td>
+                <td style="padding: 10px 12px; border: 1px solid #e2e8f0; text-align: center;">
+                    <span style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 10px; font-weight: 700; color: ${w.is_active ? '#047857' : '#b91c1c'}; background-color: ${w.is_active ? '#ecfdf5' : '#fef2f2'}; border: 1px solid ${w.is_active ? '#a7f3d0' : '#fecaca'};">
                         ${w.is_active ? 'Aktif' : 'Nonaktif'}
                     </span>
                 </td>
@@ -364,7 +368,7 @@ const Laporan = () => {
         iframe.style.position = 'fixed';
         iframe.style.left = '0';
         iframe.style.top = '0';
-        iframe.style.width = '820px';
+        iframe.style.width = '840px';
         iframe.style.height = '1200px';
         iframe.style.zIndex = '-9999';
         iframe.style.border = 'none';
@@ -378,22 +382,22 @@ const Laporan = () => {
                 <head>
                     <title>${filename}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; color: #1a202c; padding: 30px; margin: 0; background: #ffffff; }
-                        .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 12px; margin-bottom: 25px; }
-                        .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; }
-                        .header p { margin: 4px 0 0 0; font-size: 13px; color: #4b5563; }
-                        .meta-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; }
-                        .summary-cards { display: flex; gap: 15px; margin-bottom: 25px; }
-                        .card { flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; background: #f8fafc; }
-                        .card-title { font-size: 11px; text-transform: uppercase; color: #718096; font-weight: bold; letter-spacing: 0.5px; }
-                        .card-value { font-size: 18px; font-weight: bold; color: #1a202c; margin-top: 5px; }
-                        .table-title { font-size: 15px; font-weight: bold; color: #065f46; border-left: 4px solid #10b981; padding-left: 8px; margin: 20px 0 10px 0; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 11px; }
-                        th { background-color: #f1f5f9; padding: 10px 8px; border: 1px solid #ddd; font-weight: bold; text-align: left; }
-                        td { padding: 8px; border: 1px solid #ddd; }
-                        .signature-section { display: flex; justify-content: space-between; margin-top: 40px; font-size: 12px; }
-                        .signature-box { text-align: center; width: 200px; }
-                        .signature-space { height: 60px; }
+                        body { font-family: Arial, sans-serif; color: #1e293b; padding: 40px 48px; margin: 0; background: #ffffff; line-height: 1.6; }
+                        .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 16px; margin-bottom: 28px; }
+                        .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
+                        .header p { margin: 6px 0 0 0; font-size: 13px; color: #4b5563; }
+                        .meta-info { display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 13px; color: #334155; background: #f8fafc; padding: 12px 20px; border-radius: 8px; border: 1px solid #e2e8f0; }
+                        .summary-cards { display: flex; gap: 16px; margin-bottom: 28px; }
+                        .card { flex: 1; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+                        .card-title { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; letter-spacing: 0.5px; }
+                        .card-value { font-size: 20px; font-weight: bold; color: #0f172a; margin-top: 6px; }
+                        .table-title { font-size: 15px; font-weight: bold; color: #065f46; border-left: 4px solid #10b981; padding-left: 10px; margin: 28px 0 14px 0; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px; }
+                        th { background-color: #f1f5f9; padding: 12px 14px; border: 1px solid #cbd5e1; font-weight: bold; text-align: left; color: #1e293b; letter-spacing: 0.3px; }
+                        td { padding: 10px 14px; border: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
+                        .signature-section { display: flex; justify-content: space-between; margin-top: 50px; font-size: 13px; page-break-inside: avoid; }
+                        .signature-box { text-align: center; width: 220px; }
+                        .signature-space { height: 70px; }
                     </style>
                 </head>
                 <body>
@@ -461,7 +465,7 @@ const Laporan = () => {
         `);
         iframeDoc.close();
 
-        // Render PDF on loaded iframe window context without triggering print dialog
+        // Render PDF on loaded iframe window context with proper margins and scale
         setTimeout(() => {
             const printContent = iframeDoc.getElementById('print-content');
             html2canvas(printContent, {
@@ -470,24 +474,27 @@ const Laporan = () => {
                 backgroundColor: '#ffffff',
                 logging: false
             }).then((canvas) => {
-                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                const imgData = canvas.toDataURL('image/jpeg', 0.98);
                 
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210;
+                const marginX = 10;
+                const marginY = 10;
+                const printWidth = 190; // 210 - 20mm margin
                 const pageHeight = 297;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const printableHeight = pageHeight - (marginY * 2);
+                const imgHeight = (canvas.height * printWidth) / canvas.width;
                 
                 let heightLeft = imgHeight;
-                let position = 0;
+                let position = marginY;
 
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                pdf.addImage(imgData, 'JPEG', marginX, position, printWidth, imgHeight);
+                heightLeft -= printableHeight;
 
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
+                while (heightLeft > 0) {
+                    position = heightLeft - imgHeight + marginY;
                     pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
+                    pdf.addImage(imgData, 'JPEG', marginX, position, printWidth, imgHeight);
+                    heightLeft -= printableHeight;
                 }
 
                 pdf.save(filename);
