@@ -181,11 +181,17 @@ Semua inputan berformat dropdown list di seluruh fitur utama aplikasi kini telah
 4. **Tabel Relasi PostgreSQL (`users_penghuni`)**: Setiap data penghuni tersimpan otomatis ke tabel `users_penghuni` (`id`, `no_hp`, `no_hp_penghuni`, `nama_lengkap`, `tanggal_lahir`) dengan foreign key `no_hp` ke tabel `users` (ON DELETE CASCADE ON UPDATE CASCADE).
 5. **Modal Detail Profil Warga**: Saat ikon Mata (View Detail) diklik, sistem menampilkan informasi Tanggal Lahir Warga Utama dan menyajikan sub-tabel lengkap berisi seluruh Anggota Penghuni Rumah (termasuk kolom No. Handphone).
 
-### O. Konfigurasi Deployment Railway Multi-Direktori & Troubleshooting (Baru)
+#### O. Konfigurasi Deployment Railway Multi-Direktori & Troubleshooting (Baru)
 1. **Entrypoint Universal (`node server.js`)**: Pembuatan file jembatan entrypoint (`server.js` di Root, `backend/server.js`, `frontend/server.js`, dan `backend/backend/server.js`) sehingga perintah `node server.js` selalu menemukan file aplikasi di semua variasi opsi *Root Directory* Railway Dashboard (`/`, `/backend`, atau `/frontend`).
 2. **Kompilasi Otomatis Production (`dist`)**: Konfigurasi `package.json` dan `nixpacks.toml` me-run `cd frontend && npm install && npm run build` untuk menghasilkan bundel SPA di folder `dist/` sebelum kontainer dinyalakan, mencegah halaman *white screen* akibat kode mentah JSX.
 3. **Kompatibilitas Middleware Express 5.x**: Mengubah wildcard router `app.get('*', ...)` menjadi middleware `app.use((req, res, next) => ...)` untuk menghindari error `PathError: Missing parameter name at index 1: *`.
 4. **Sinkronisasi Dependency Lockfile**: Menjalankan `npm install` pada folder frontend dan root untuk mengupdate `package-lock.json` sehingga perintah `npm ci` di Nixpacks Railway berjalan 100% lulus tanpa error ketidaksesuaian dependensi `express`.
+
+### P. Standarisasi Layout, Padding, & Margin Ekspor PDF (Baru)
+1. **Penerapan Internal Container Padding**: Penambahan `padding: 45px 55px;` langsung pada elemen `#print-content` agar `html2canvas` menangkap batas ruang kosong secara penuh.
+2. **Margin Kertas A4 Simetris (~20mm)**: Pengaturan `iframe.style.width = '900px'` dan margin luar `8mm` di `jsPDF` untuk memberikan jarak margin kanan-kiri sekitar **2 cm (20mm)** di kertas A4 tanpa terpotong.
+3. **Proporsi Sel Tabel & Kerapian Teks**: Perapihan *padding* sel header (`th: 12px 14px`) dan isi (`td: 10px 14px`) serta pembagian persentase lebar kolom yang presisi agar teks nama, nomor HP, alamat, dan status hunian tampil rapi.
+4. **Desain Komponen Visual**: Pembaruan gaya *pill badge* status (Aktif/Nonaktif/Lunas/Tunggakan), penyelarasan *summary cards*, dan perapihan blok area tanda tangan.
 
 ---
 

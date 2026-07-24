@@ -119,6 +119,9 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`server.js`, `start.js`, `backend/start.js`, `frontend/server.js` [NEW]**: Penambahan file entrypoint bridging di root, backend, dan frontend agar perintah `node server.js` selalu berhasil mengeksekusi aplikasi terlepas dari opsi *Root Directory* pada Railway Dashboard (`/`, `/backend`, atau `/frontend`).
 - **`Procfile`, `nixpacks.toml`, `railway.json`, `package.json` [NEW/MODIFY]**: Standardisasi perintah *build* (`cd frontend && npm install && npm run build`) dan perintah *start* (`node server.js`), serta sinkronisasi file `package-lock.json` untuk kelancaran eksekusi `npm ci` di Nixpacks Railway.
 
+### 18. Standarisasi Layout, Padding, & Margin Hasil Ekspor PDF (Baru)
+- **`frontend/src/features/laporan/Laporan.jsx` [MODIFY]**: Penerapan *internal container padding* (`#print-content { padding: 45px 55px; }`), penyesuaian lebar iframe kanvas (`900px`), penambahan margin luar A4 (`8mm` di jsPDF untuk menghasilkan total margin ~20mm simetris di kedua sisi), perapihan *padding* sel tabel (`th: 12px 14px`, `td: 10px 14px`), pembagian persentase kolom tabel yang presisi, serta penyelarasan desain visual badge status & area tanda tangan di seluruh fungsi ekspor PDF (Data Warga & Keuangan).
+
 ---
 
 ## Verification Plan
