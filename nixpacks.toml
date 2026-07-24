@@ -8,4 +8,4 @@ cmds = ['npm install', 'cd frontend && npm install', 'cd backend && npm install'
 cmds = ['cd frontend && npm run build']
 
 [start]
-cmd = 'cd backend && node server.js'
+cmd = 'node -e "const fs = require(\'fs\'); if (fs.existsSync(\'./server.js\')) require(\'./server.js\'); else require(\'./backend/server.js\');"'
