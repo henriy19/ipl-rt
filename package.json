@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run build:frontend",
-    "build:frontend": "cd frontend && npm install && npm run build",
-    "start": "node -e \"const fs = require('fs'); if (fs.existsSync('./server.js')) require('./server.js'); else require('./backend/server.js');\""
+    "build": "cd frontend && npm install && npm run build",
+    "start": "node start.js"
   },
   "engines": {
     "node": ">=20.0.0"
