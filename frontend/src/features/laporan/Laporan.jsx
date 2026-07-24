@@ -182,8 +182,8 @@ const Laporan = () => {
         iframe.style.position = 'fixed';
         iframe.style.left = '0';
         iframe.style.top = '0';
-        iframe.style.width = '840px';
-        iframe.style.height = '1200px';
+        iframe.style.width = '900px';
+        iframe.style.height = '1400px';
         iframe.style.zIndex = '-9999';
         iframe.style.border = 'none';
         iframe.style.visibility = 'hidden';
@@ -196,7 +196,8 @@ const Laporan = () => {
                 <head>
                     <title>${filename}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; color: #1e293b; padding: 40px 48px; margin: 0; background: #ffffff; line-height: 1.6; }
+                        body { font-family: Arial, sans-serif; color: #1e293b; padding: 0; margin: 0; background: #ffffff; line-height: 1.6; }
+                        #print-content { padding: 45px 55px; background: #ffffff; box-sizing: border-box; width: 100%; }
                         .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 16px; margin-bottom: 28px; }
                         .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
                         .header p { margin: 6px 0 0 0; font-size: 13px; color: #4b5563; }
@@ -300,9 +301,9 @@ const Laporan = () => {
                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
                 
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const marginX = 10;
-                const marginY = 10;
-                const printWidth = 190; // 210 - 20mm margin
+                const marginX = 8;
+                const marginY = 8;
+                const printWidth = 194; // 210 - 16mm margin
                 const pageHeight = 297;
                 const printableHeight = pageHeight - (marginY * 2);
                 const imgHeight = (canvas.height * printWidth) / canvas.width;
@@ -368,8 +369,8 @@ const Laporan = () => {
         iframe.style.position = 'fixed';
         iframe.style.left = '0';
         iframe.style.top = '0';
-        iframe.style.width = '840px';
-        iframe.style.height = '1200px';
+        iframe.style.width = '900px';
+        iframe.style.height = '1400px';
         iframe.style.zIndex = '-9999';
         iframe.style.border = 'none';
         iframe.style.visibility = 'hidden';
@@ -382,7 +383,8 @@ const Laporan = () => {
                 <head>
                     <title>${filename}</title>
                     <style>
-                        body { font-family: Arial, sans-serif; color: #1e293b; padding: 40px 48px; margin: 0; background: #ffffff; line-height: 1.6; }
+                        body { font-family: Arial, sans-serif; color: #1e293b; padding: 0; margin: 0; background: #ffffff; line-height: 1.6; }
+                        #print-content { padding: 45px 55px; background: #ffffff; box-sizing: border-box; width: 100%; }
                         .header { text-align: center; border-bottom: 3px double #10b981; padding-bottom: 16px; margin-bottom: 28px; }
                         .header h1 { margin: 0; font-size: 24px; color: #065f46; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 800; }
                         .header p { margin: 6px 0 0 0; font-size: 13px; color: #4b5563; }
@@ -431,12 +433,12 @@ const Laporan = () => {
                         <table>
                             <thead>
                                 <tr>
-                                    <th style="width: 5%; text-align: center;">No</th>
-                                    <th style="width: 25%;">Nama Lengkap</th>
-                                    <th style="width: 15%; text-align: center;">No. HP</th>
-                                    <th style="width: 25%;">Alamat</th>
-                                    <th style="width: 10%; text-align: center;">Hunian</th>
-                                    <th style="width: 10%; text-align: center;">Penghuni</th>
+                                    <th style="width: 6%; text-align: center;">No</th>
+                                    <th style="width: 22%;">Nama Lengkap</th>
+                                    <th style="width: 16%; text-align: center;">No. HP</th>
+                                    <th style="width: 24%;">Alamat</th>
+                                    <th style="width: 11%; text-align: center;">Hunian</th>
+                                    <th style="width: 11%; text-align: center;">Penghuni</th>
                                     <th style="width: 10%; text-align: center;">Status</th>
                                 </tr>
                             </thead>
@@ -477,9 +479,9 @@ const Laporan = () => {
                 const imgData = canvas.toDataURL('image/jpeg', 0.98);
                 
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const marginX = 10;
-                const marginY = 10;
-                const printWidth = 190; // 210 - 20mm margin
+                const marginX = 8;
+                const marginY = 8;
+                const printWidth = 194; // 210 - 16mm margin
                 const pageHeight = 297;
                 const printableHeight = pageHeight - (marginY * 2);
                 const imgHeight = (canvas.height * printWidth) / canvas.width;
