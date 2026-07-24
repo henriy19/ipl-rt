@@ -113,6 +113,12 @@ Fase ini mencakup implementasi sistem keamanan autentikasi JWT serta pembangunan
 - **`backend/src/models/userModel.js` & `backend/src/controllers/userController.js` [MODIFY]**: Integrasi proyeksi `tanggal_lahir`, `no_hp_penghuni`, dan pemanggilan `Penghuni.syncPenghuni` pada handler `CreateWarga`, `UpdateWarga`, dan `UploadExcelWarga`.
 - **`frontend/src/features/warga/Warga.jsx` [MODIFY]**: Penambahan field input Tanggal Lahir pada Warga Utama, input No. HP opsional per anggota penghuni, sub-form dinamis Detail Penghuni (tambah/hapus anggota keluarga), pembaruan otomatis `jumlah_penghuni`, sanitasi tanggal lahir, serta visualisasi sub-tabel detail penghuni (termasuk kolom No. Handphone) pada Modal Profil Warga.
 
+### 17. Konfigurasi Deployment Railway Multi-Direktori & Migrasi Skema Terisolasi (Baru)
+- **`backend/src/config/dbInit.js` & `backend/src/config/db.js` [MODIFY]**: Isolasi eksekusi DDL `ALTER TABLE` secara mandiri per query pada saat server dinyalakan serta penyesuaian konfigurasi SSL fleksibel (`getSslConfig`) untuk koneksi PostgreSQL Railway internal/external.
+- **`backend/src/app.js` [MODIFY]**: Penambahan handler file statis `express.static` untuk mendeteksi lokasi bundel `frontend/dist` di berbagai skenario direktori deployment serta pembaruan middleware kompatibilitas Express 5.x untuk *SPA fallback routing*.
+- **`server.js`, `start.js`, `backend/start.js`, `frontend/server.js` [NEW]**: Penambahan file entrypoint bridging di root, backend, dan frontend agar perintah `node server.js` selalu berhasil mengeksekusi aplikasi terlepas dari opsi *Root Directory* pada Railway Dashboard (`/`, `/backend`, atau `/frontend`).
+- **`Procfile`, `nixpacks.toml`, `railway.json`, `package.json` [NEW/MODIFY]**: Standardisasi perintah *build* (`cd frontend && npm install && npm run build`) dan perintah *start* (`node server.js`), serta sinkronisasi file `package-lock.json` untuk kelancaran eksekusi `npm ci` di Nixpacks Railway.
+
 ---
 
 ## Verification Plan
